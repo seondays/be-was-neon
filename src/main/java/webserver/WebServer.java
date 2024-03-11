@@ -3,12 +3,15 @@ package webserver;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WebServer {
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
     private static final int DEFAULT_PORT = 8080;
+    private static final ExecutorService pool = Executors.newCachedThreadPool();
 
     public static void main(String args[]) throws Exception {
         int port = 0;
@@ -17,17 +20,17 @@ public class WebServer {
         } else {
             port = Integer.parseInt(args[0]);
         }
-
         // 서버소켓을 생성한다. 웹서버는 기본적으로 8080번 포트를 사용한다.
+        // 지정된 소켓에서 수신 대기할 수 없는 경우 예외가 발생할 것이다. (이미 사용중인 포트와 같은 경우)
         try (ServerSocket listenSocket = new ServerSocket(port)) {
             logger.info("Web Application Server started {} port.", port);
 
             // 클라이언트가 연결될때까지 대기한다.
             Socket connection;
             while ((connection = listenSocket.accept()) != null) {
-                Thread thread = new Thread(new RequestHandler(connection));
-                thread.start();
+                pool.submit(new RequestHandler(connection));
             }
+            pool.shutdown();
         }
     }
 }

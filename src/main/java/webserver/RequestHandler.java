@@ -30,10 +30,17 @@ public class RequestHandler implements Runnable {
             // InputStream으로 읽어 오는 요청을 BufferedReader에 담는다
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             String line = br.readLine();
+            logger.debug("request line : {}", line);
+
             // request의 첫번째 줄에서 path 분리하기
             String[] requestLine = line.split(" ");
             String path = "src/main/resources/static/" + requestLine[1];
 
+            // request 요청은 마지막 끝에 공백문자가 포함되어 오기 때문에, ""을 체크하여 while문을 돈다
+            while (!line.equals("")) {
+                line = br.readLine();
+                logger.debug("header : {}", line);
+            }
             DataOutputStream dos = new DataOutputStream(out);
             byte[] mybody = parseFileToByte(path);
             response200Header(dos, mybody.length);

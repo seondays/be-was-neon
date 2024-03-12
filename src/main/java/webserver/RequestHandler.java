@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import utils.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class RequestHandler implements Runnable {
 
             // request의 첫번째 줄에서 path 분리하기
             String[] requestLine = line.split(" ");
-            String path = "src/main/resources/static/" + requestLine[1];
+            String path = parsePath(requestLine[1]); // /registration
 
             // request 요청은 마지막 끝에 공백문자가 포함되어 오기 때문에, ""을 체크하여 while문을 돈다
             while (!line.equals("")) {
@@ -48,6 +49,11 @@ public class RequestHandler implements Runnable {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    // 요청을 주소와 매칭해주도록 한다.
+    public String parsePath(String request) {
+        return Paths.parsePath(request);
     }
 
     /* file 내용을 바이트로 읽어와서 byte[]로 변환하는 메서드를 만들어준다.

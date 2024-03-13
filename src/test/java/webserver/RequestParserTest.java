@@ -28,4 +28,12 @@ class RequestParserTest {
         requestParser.responseCreate();
         assertThat(Database.findUserById("javajigi")).isNotNull();
     }
+
+    @Test
+    @DisplayName("응답을 위해 파일 내용을 바이트 배열로 올바르게 변환하는지 확인한다.")
+    void parseFileToByte() throws IOException {
+        requestParser = new RequestParser("GET /index.html HTTP/1.1");
+        byte[] body = Files.readAllBytes(new File("src/main/resources/static/index.html").toPath());
+        assertThat(body).isEqualTo(requestParser.parseFileToByte());
+    }
 }

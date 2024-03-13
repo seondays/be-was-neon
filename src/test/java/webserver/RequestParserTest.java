@@ -20,4 +20,12 @@ class RequestParserTest {
         assertThat(createRequest.isCreate()).isTrue();
         assertThat(otherRequest.isCreate()).isFalse();
     }
+
+    @Test
+    @DisplayName("create 요청에 응답하는 경우, DB에 유저가 정상적으로 저장되는지 확인한다.")
+    void createAddUser() {
+        requestParser = new RequestParser("GET /create?userId=javajigi&password=password&name=%EB%B0%95%EC%9E%AC%EC%84%B1&email=javajigi%40slipp.net");
+        requestParser.responseCreate();
+        assertThat(Database.findUserById("javajigi")).isNotNull();
+    }
 }

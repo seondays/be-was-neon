@@ -5,7 +5,8 @@ import java.util.Objects;
 
 public enum Paths {
     HOME("/index.html", "/index.html"),
-    REGISTER("/registration", "/registration/register.html");
+    REGISTER("/registration", "/registration/index.html"),
+    CREATE("/create","");
 
     private final String request;
     private final String response;
@@ -16,16 +17,19 @@ public enum Paths {
     }
 
     //체크해서 어디 루트인지 찾아주기
-    public static String parsePath(String request) {
+    public static Paths parsePath(String request) {
         return Objects.requireNonNull(Arrays.stream(Paths.values())
                         .filter(paths -> paths.request.equals(request))
                         .findFirst()
-                        .orElse(null))
-                .makeResultUrl();
+                        .orElse(null));
     }
 
-    private String makeResultUrl() {
+    public String makeResultUrl() {
         final String BASE_PATH = "src/main/resources/static/";
         return BASE_PATH + response;
+    }
+
+    public String getRequest() {
+        return request;
     }
 }

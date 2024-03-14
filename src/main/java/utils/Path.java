@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 
 public class Path {
     public static final String BASE_PATH = "src/main/resources/static";
+    public static final String DEFAULT_FILE = "/index.html";
 
     /*
      요청받은 리소스 정보를 가지고 유효한 주소를 만들어준다.
@@ -13,12 +14,11 @@ public class Path {
      유효하지 않은 파일일 경우 예외를 발생시킨다.
      */
     public String buildURL(String resource) throws FileNotFoundException {
-        final String defaultFile = "/index.html";
         StringBuffer result = new StringBuffer(BASE_PATH);
 
         if (isDirectory(resource)) {
             result.append(resource);
-            result.append(defaultFile);
+            result.append(DEFAULT_FILE);
         } else {
             result.append(resource);
         }
@@ -27,6 +27,11 @@ public class Path {
             throw new FileNotFoundException();
         }
         return result.toString();
+    }
+
+    // 리다이렉션할 주소(파일에 관한 주소가 아니다.) 서버에 보내는 요청 주소 즉 http://localhost:8080/login/index.html 를 리턴해준다
+    public String buildForRedirection(String resource) {
+        return resource + DEFAULT_FILE;
     }
 
     private boolean isDirectory(String resource) throws FileNotFoundException {

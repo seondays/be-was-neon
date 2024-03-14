@@ -49,6 +49,7 @@ public class RequestParser {
      file 내용을 바이트로 읽어와서 byte[]로 변환하는 메서드이다.
      파일의 크기만큼의 바이트 배열을 만들고, FileInputStream의 read 메서드를 통해 해당 배열에
      파일의 내용을 작성한다.
+     todo : create랑 함께 쓸 수 있도록 파일 path는 외부에서 받아오는 걸로 수정해보자
     */
     public byte[] parseFileToByte() throws IOException {
         Path path = new Path();

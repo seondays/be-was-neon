@@ -79,7 +79,7 @@ Exception in thread "Thread-4" java.lang.NullPointerException
 ```
 pool.submit(new RequestHandler(connection));
 ```
-![정상 콘솔](<img width="1600" alt="스크린샷 2024-03-13 오후 7 14 17" src="https://github.com/seondays/LeetCode/assets/110711591/b628bf8f-b338-45fe-a6c6-0d5ef8d1998e">)'
+![정상 콘솔](https://github.com/seondays/LeetCode/assets/110711591/defa4cba-2ca0-4619-a742-daba8c63b33f)
 
 콘솔 창에 아무런 예외가 발생하지 않고 있다. 왜일까?
 

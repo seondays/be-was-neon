@@ -31,6 +31,7 @@ public class RequestParser {
     /*
      응답 시 리소스(파일)을 전달할 필요가 없는 create의 경우에만 사용한다.
      User를 생성한 다음 DB에 저장하고, body가 될 바이트 배열을 비워서 반환한다.
+     todo : body를 만드는 동작과, db에 저장하는 동작을 분리하는 것이 좋아보이긴 한다.
     */
     public byte[] responseCreate() {
         String userInfo = requestPath[1];
@@ -60,7 +61,10 @@ public class RequestParser {
         return result;
     }
 
-    // 회원가입을 위한 정보를 받아 해당 값을 파싱해서 Map으로 저장한다
+    /*
+     회원가입을 위한 정보를 받아 해당 값을 파싱해서 Map으로 저장한다.
+     해당 메서드의 결과값은 User를 생성할 때, 생성자로 사용된다.
+     */
     private Map<String, String> requestInfoToMap(String info) {
         return Arrays.stream(info.split(ELEMENTS_DELIMITER))
                 .map(s -> s.split(KEY_VALUE_DELIMITER))

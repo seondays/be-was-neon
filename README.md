@@ -1,66 +1,96 @@
 # be-was-2024
 코드스쿼드 백엔드 교육용 WAS 2024 개정판
 
-### HTTP GET 메서드 [🔗](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET)
-get 방식은 데이터를 요청할 때만 사용해야 하고, `GET /index.html`와 같이 GET과 요청하는 정보를 보낸다.
-성공 시 200 (OK) 성공 코드와, 요청한 리소스를 응답받는다.
+### 필요한 전체 기능 정리
+- 리퀘스트 요청에서 리소스만 뽑아내는 기능
+- 분리한 리소스가 파일인지 디렉토리인지 식별하는 기능
+  - 파일인 경우 해당 파일의 주소를 앞에 추가하여 온전한 path를 만들어주는 기능 필요
+  - 디렉토리일 경우 해당 디렉토리 내부의 index.html을 찾아가도록 하는 기능 필요
+- 요청에 대한 응답 내용을 준비하는 기능
+  - 파일이 존재하는 경우, 해당 파일을 전송하기 위해 바이트 배열로 변경하는 기능 필요
+  - 요청 결과에 따라 헤더를 추가한다
+    - e) 파일이 없는 경우 예외 처리 (헤더를 404로 설정)
+    - 성공적으로 응답을 주는 경우 헤더를 200으로 설정
 
-### 🧐 전체 동작 구조 분석
-#### WebServer 클래스
-- 기본 포트 번호는 8080으로 설정되었다.
-> 왜 8080으로 설정했을까?
->> 보안 때문에 리눅스나 유닉스에서는 1024 이하의 포트는 유저들이 바인딩 할 수 없게 했다고 한다. (root가 아닌 사용자들)
-그래서 사용자가 웹 서버를 실행하기 위해서 8080 포트를 많이 사용하던 것이 관습이 된 모양  
-[참고자료](https://www.grc.com/port_8080.htm)
+## Step2 GET으로 회원가입
+### step2 기능 구현 목록
+- [x] 회원가입 메뉴 요청이 들어오면 회원가입 페이지를 보내준다.
+- [x] 회원가입 메뉴에서 사용자가 가입한 값을 가져와서 저장한다.
+  - [x] 한글 이름이 들어오는 경우 디코딩 해주는 기능
+- [x] 저장한 결과에 따라서 적절한 응답 메시지를 보내준다.
+- [x] 클라이언트에서 오는 요청이 어떤 경로를 찾아야 하는지 체크해주는 기능
 
-- `ServerSocket listenSocket = new ServerSocket(port)`로 서버소켓을 생성하고 있다.
-- `Socket connection`을 가지고 listenSocket.accept()을 null이 아닌 것을 체크하는 중
-    `(connection = listenSocket.accept()) != null` 이렇게 되어 있다.  
-    &rarr; 요청이 들어오는지 대기ing. 들어오면 Socket이 만들어져 연결되므로, 내부 코드 실행
-> ServerSocket과 일반 Socket의 차이는 무엇일까? [🔗](https://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html)
-> >[ServerSocket](https://docs.oracle.com/javase/8/docs/api/java/net/ServerSocket.html)은
-서버 측에서 클라이언트를 기다리기 위해 대기하는 역할을 하는 소켓이다. 포트번호를 바인딩해서 새로운 서버소켓을 만들면 accept 메서드를 통해
-해당 서버로 오는 요청을 기다리게 된다.
-[Socket](https://docs.oracle.com/javase/8/docs/api/index.html?java/net/Socket.html)은 실제로 클라이언트와 통신하기 위한 객체이다.  
-accept 메서드를 통해 대기하고 있던 서버가 클라이언트의 요청을 받게 되고 성공적으로 설정되면, 동일한 로컬 포트에 바인딩되고, 원격 주소와 원격 포트가
-클라이언트의 포트로 설정된 Socket 객체를 반환하고, 이제 서버는 이 소켓을 이용하여 클라이언트와 통신할 수 있다.
+### 설계 및 고민 정리
+- 회원가입버튼을 누르면 GET /registration HTTP/1.1 이렇게 요청이 온다. step-1과 다르게 실제 파일명으로 들어오는 것이 아니다.
+우리는 /registration/index.html 으로 응답해줘야 한다. 이를 위해 요청-응답을 알맞게 변환해줄 Paths라는 객체가 있으면 좋을 것 같다.
 
-> 굳이 Socket이라는 connection 변수를 따로 만들어서 체크하는 이유가 뭘까?
-> > Socket과 ServerSocket이 다른 역할을 하는 객체이고, 클라이언트와의 연결 수단인 Socket을 가지고 Handler로 넘겨서
-통신해야하기 때문에
 
-> main에서 따로 try만 하고 catch 대신 throws Exception을 하는 이유는 뭘까?
+- 회원가입 정보를 입력하고 제출하는 버튼을 눌러도, 서버로 아무런 요청이 오지 않는다.. 어떻게 요청 url을 받을 것인가?
+&rarr; html 파일에서 아이디, 닉네임, 비밀번호를 가지고 보내기를 원하는 형식으로 바꾼 다음 [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
+를 통해 서버로 요청을 보낸다.
 
-- 이후 RequestHandler를 Thread pool에 제출하여 실행한다.
 
-#### RequestHandler 클래스
-connection 이라는 Socket을 외부에서 받아서 사용하고 있다.
+- create 요청을 받았을 때도 지금 수행 후 빈 body 값을 일단 만들도록 구현했는데 이 부분이 적절한 판단이었을까?
 
-socket의 getInputStream으로 클라이언트에서 서버쪽으로 오는 요청 데이터를 가져오고,  
-socket의 getOutputStream으로 서버에서 클라이언트쪽으로 응답을 보내는 데이터를 가져온다.
+
+- accept 메서드가 호출되면 소켓에 대한 연결을 기다리는 상태가 된다. (연결이 이루어질 때까지 block 상태)
+그러다 서버소켓에 요청이 들어오면 서버소켓은 Interrupt를 받아 깨어나고 요청을 받아 소켓을 만듭니다. (현재 프로젝트 코드에서는 connection)
+이제 해당 소켓 객체를 통해서 통신이 이루어진다. 내가 착각했던 부분은 connection 소켓 객체가 클라이언트 쪽에서 요청이 오면서 열린 포트 그 자체라고 생각했기 때문에,
+이 소켓에 포트번호 정보가 필요 없다고 했을 때 혼동이 있었다.
+그치만 포트 번호는 소켓의 식별을 위해 필요한 정보 중 하나이지, 소켓 자체가 포트가 아니다.
+
+
+- 요청받은 리소스를 찾을 수 없는 경우 어떻게 예외 처리를 해야 할 것이며, 헤더에 그 결과를 어떻게 반영해서 보내줄 수 있을까?
+&rarr; 예외를 터트리고, 그 예외를 위로 올려서 catch로 처리하자. catch의 본문에는 404 헤더를 넣는 부분을 추가하자.
+&rarr; 그런데 기존 헤더를 생성하는 부분은 DataOutputStream에 헤더를 내보내는 부분이 있어서 여기서도 try가 필요하게 된다.. 그러면 두 기능을 메서드 두개로 나눠보자!
+
+### 궁금한 점 분석
+NullPointerException 예외 발생 가능성이 있는 코드가 있었다. 구현되어 있는 내용상 무조건 NullPointerException이 발생하는 상황이었는데,
+해당 예외를 핸들링하도록 하는 부분을 작성하지 않았으므로, 해당 예외가 콘솔창에 표시되어야 했다.
+
+그런데 이런 상황에서 thread pool을 만들어서 pool에 submit 하는 방식으로 서버를 구현할 경우, 해당 예외가 발생하더라도 콘솔 창에 예외가 뜨지 않았다.
+반면 스레드를 이용해서 바로 start로 실행하는 경우, 혹은 pool에 excute로 실행하는 경우에는 예외가 발생했다고 콘솔 창에서 표시되는데 왜 동작 결과가 다른 것일까?
 
 ```
-GET /index.html HTTP/1.1
-Host: localhost:8080
-Connection: keep-alive
-Accept: */*
+Thread thread = new Thread(new RequestHandler(connection));
+thread.start();
 ```
-요청 데이터(request)는 이런 식으로 들어온다. 여기서 GET은 HTTP 요청 메서드로 해당 방식으로 데이터를 받는다는 의미이며
-/index.html은 요청하는 리소스의 경로(파일명)를 나타낸다. 마지막으로 HTTP/1.1은 HTTP의 버전을 의미한다.
+이렇게 직접 스레드를 가지고 서버를 시작하는 경우 오류가 나는 부분에 도달하면 아래와 같이 표시된다.  
+```
+Exception in thread "Thread-1" java.lang.NullPointerException
+	at java.base/java.util.Objects.requireNonNull(Objects.java:209)
+	at utils.Paths.parsePath(Paths.java:21)
+	at webserver.RequestParser.parsePath(RequestParser.java:70)
+	at webserver.RequestParser.parseFileToByte(RequestParser.java:45)
+	at webserver.RequestHandler.responseProcess(RequestHandler.java:54)
+	at webserver.RequestHandler.run(RequestHandler.java:32)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Exception in thread "Thread-4" java.lang.NullPointerException
+	at java.base/java.util.Objects.requireNonNull(Objects.java:209)
+	at utils.Paths.parsePath(Paths.java:21)
+	at webserver.RequestParser.parsePath(RequestParser.java:70)
+	at webserver.RequestParser.parseFileToByte(RequestParser.java:45)
+	at webserver.RequestHandler.responseProcess(RequestHandler.java:54)
+	at webserver.RequestHandler.run(RequestHandler.java:32)
+```
 
-요청 데이터가 오는 InputStream은 바이트로 이루어져있기 때문에 불편, 그래서 우리가 확인하고 보기 위해 BufferedReader와 함께
-활용한다.
-첫번째 줄의 데이터에서 path를 분리해서 해당 path에 존재하는 내용을 byte배열로 변경해준다. OutputStream으로 보낼 때도 바이트로 보내야하기
-때문이다.
+반면 submit을 사용해서 다음과 같이 서버를 실행하면
 
-DataOutputStream을 가지고 클라이언트에게로 보낼 응답을 만들 준비를 한다.
-먼저 `response200Header` 메서드에서는 응답 헤더를 만드는 역할을 한다.
-추가적으로 `responseBody` 메서드를 이용해 본문에 화면에 보여줄 코드 내용을 넣어야 한다. 요청받은 path의 파일 내용을 파라미터로
-지정하여 `DataOutputStream`에 이어 담아주면 된다. 해당 메서드에서는 `DataOutputStream`의 write를 이용해 바이트 배열의 내용을
-해당 스트림에 쓰고 있다.
+```
+pool.submit(new RequestHandler(connection));
+```
+![정상 콘솔](<img width="1600" alt="스크린샷 2024-03-13 오후 7 14 17" src="https://github.com/seondays/LeetCode/assets/110711591/b628bf8f-b338-45fe-a6c6-0d5ef8d1998e">)'
 
-그리고 이와 별개로 logger를 이용하여 로그를 찍어서 보여주고 있다.
+콘솔 창에 아무런 예외가 발생하지 않고 있다. 왜일까?
 
-> OutputStream과 DataOutputStream의 차이는 뭘까? 굳이 한번 DataOutputStream에 넣어서 응답을 만드는 이유는 뭘까?
-> > DataOutputStream은 각종 데이터를 바이트 형태로 바꿔줄 수 있도록 하는 기능들을 가지고 있어서, 우리가 필요한 내용들을 작성해서
-다시 바이트 형태로 바꿔 줄 수 있기 때문이다.
+#### submit()와 execute()
+> Submits a value-returning task for execution and returns a Future representing the pending results of the task.
+
+> Executes the given command at some time in the future.
+
+~작성중~
+
+
+### 알아보기
+- Objects로 null을 핸들링하는 방법들
+- completablefuture

@@ -12,7 +12,6 @@ public class Path {
      파일이라면 해당 파일의 주소를 생성한 후에, 해당 주소가 유효한지 확인한다.
      유효하지 않은 파일일 경우 예외를 발생시킨다.
      */
-    // todo : 이 예외를 던지면 헤더를 404를 주고 싶다. 어떻게 처리해야 할까?
     public String buildURL(String resource) throws FileNotFoundException {
         final String defaultFile = "/index.html";
         StringBuffer result = new StringBuffer(BASE_PATH);
@@ -36,7 +35,6 @@ public class Path {
     }
 
     private boolean isFileExists(String resource) {
-        System.out.println(resource);
         return new File(resource).exists();
     }
 }

@@ -9,7 +9,9 @@ public enum ExtensionType {
     JS("text/jscript"),
     ICO("image/x-icon"),
     PNG("image/png"),
-    JPG("image/jpg");
+    JPG("image/jpg"),
+    SVG("image/svg+xml");
+
 
     private final String contentType;
 

@@ -43,6 +43,22 @@
 타입은 좀 더 일반적인 범주를 의미하며(text, image, application), 서브타입은 그 중의 정확한 데이터 종류를 의미하게 된다.  
 예를 들면 image 타입 내의 여러 서브타입들 png, gif 등등..
 
+
+#### javadoc 스타일의 주석이란 무엇일까? [🔗](https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html)
+- javadoc란 `/** ... */` 형식을 가지는 특수한 주석들의 API 문서를 생성해주는 JDK 도구입니다.
+- 해당 형식으로 주석을 작성 후 javadoc 명령어를 실행하면 API 문저가 생성되는 것을 확인할 수 있습니다.
+- @ 태그를 이용하여 설명을 추가할 수 있습니다
+
+```
+/**
+* javadoc style annotation
+* @param  url  an absolute URL giving the base location of the image
+* @param  name the location of the image, relative to the url argument
+* @return      the image at the specified URL
+* @see         Image
+*/
+```
+
 #### 새롭게 접한 것들
 - String의 lastIndexOf(ch target) : target이 해당 문자열에서 마지막으로 나타난 위치 Index를 반환하는 메서드
 - StringBuffer에 append 하는 경우, 변수값을 주고 싶을 때 -> String.format과 함께 사용하자

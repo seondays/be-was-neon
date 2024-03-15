@@ -20,13 +20,13 @@ public class WebServer {
         } else {
             port = Integer.parseInt(args[0]);
         }
-        // 서버소켓을 생성한다. 웹서버는 기본적으로 8080번 포트를 사용한다.
-        // 지정된 소켓에서 수신 대기할 수 없는 경우 예외가 발생할 것이다. (이미 사용중인 포트와 같은 경우)
+
+        // 지정된 소켓에서 수신 대기할 수 없는 경우 예외가 발생할 것이다. 따라서 try로 감싸준다. (이미 사용중인 포트와 같은 경우)
         try (ServerSocket listenSocket = new ServerSocket(port)) {
             logger.info("Web Application Server started {} port.", port);
 
-            // 클라이언트가 연결될때까지 대기한다.
             Socket connection;
+            // accept 메서드를 실행했기 때문에 메인 스레드는 멈춰 있다. 소켓을 기다리는 block 상태이다. 인터럽트를 받아서 깨어난다.
             while ((connection = listenSocket.accept()) != null) {
                 pool.submit(new RequestHandler(connection));
             }

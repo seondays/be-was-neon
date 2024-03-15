@@ -145,5 +145,18 @@
         </nav>
       </div>
     </div>
+    <script>
+      fetch('http://localhost:8080')
+              .then(response => {
+                console.log("Response status code:", response.status);
+                return response.text();
+              })
+              .then(data => {
+                console.log("Server response:", data);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+    </script>
   </body>
 </html>

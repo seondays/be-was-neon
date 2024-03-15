@@ -12,85 +12,37 @@
     - e) 파일이 없는 경우 예외 처리 (헤더를 404로 설정)
     - 성공적으로 응답을 주는 경우 헤더를 200으로 설정
 
-## Step2 GET으로 회원가입
-### step2 기능 구현 목록
-- [x] 회원가입 메뉴 요청이 들어오면 회원가입 페이지를 보내준다.
-- [x] 회원가입 메뉴에서 사용자가 가입한 값을 가져와서 저장한다.
-  - [x] 한글 이름이 들어오는 경우 디코딩 해주는 기능
-- [x] 저장한 결과에 따라서 적절한 응답 메시지를 보내준다.
-- [x] 클라이언트에서 오는 요청이 어떤 경로를 찾아야 하는지 체크해주는 기능
+## Step3 다양한 컨텐츠 타입 지원
+### step3 기능 구현 목록
+- [x] 리소스의 컨텐츠 타입 구분을 위해 확장자를 확인하고 식별하는 기능
+- [x] 확장자에 알맞게 헤더의 컨텐츠 타입을 변경하는 기능
 
 ### 설계 및 고민 정리
-- 회원가입버튼을 누르면 GET /registration HTTP/1.1 이렇게 요청이 온다. step-1과 다르게 실제 파일명으로 들어오는 것이 아니다.
-우리는 /registration/index.html 으로 응답해줘야 한다. 이를 위해 요청-응답을 알맞게 변환해줄 Paths라는 객체가 있으면 좋을 것 같다.
+- 응답 헤더에 content type을 유동적으로 변경해야 한다. 그래서 응답해 줄 최종 URL을 파라미터로 받아서 해당 파일의 mime 타입을 반환하도록 하는 함수를 만들었다.  
+이렇게 단순 리소스(/index.html)로 바로 진행하지 않고, 전체 URL(src/main/resources/static/registration/index.html)로 변경한 후에 mime을 찾도록 한 이유는
+들어온 리소스가 디렉토리일 경우 뒤에 파일을 추가하는 부분도 필요하고, create처럼 특별한 파싱이 필요할 수도 있으므로 안정성을 위해서 최종 URL을 받아서 처리하게 했다.
 
 
-- 회원가입 정보를 입력하고 제출하는 버튼을 눌러도, 서버로 아무런 요청이 오지 않는다.. 어떻게 요청 url을 받을 것인가?
-&rarr; html 파일에서 아이디, 닉네임, 비밀번호를 가지고 보내기를 원하는 형식으로 바꾼 다음 [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
-를 통해 서버로 요청을 보낸다.
+- 회원 가입이 끝나면 바로 로그인 창으로 redirection 시키고 싶었다.  
+이를 위해 클라이언트 쪽에 200 헤더와 login.html의 파일 내용이 담긴 응답을 보내보았다. 그런데 then으로 자바스크립트에서 이후 동작을 지시하고 있음에도 페이지는 alert만 뜨고 반응이 없었다..  
+**[이유]** 작동하지 않았던 두가지 중요한 이유가 있었다. 첫번째로 자바스크립트 코드에서 `window.location.href = newUrl;` 이런 식으로 새로운 주소로 이동하도록 하는 부분이 필요했다.
+응답으로 로그인 창에 대한 정보를 보낸다고 해도 클라이언트(브라우저) 쪽에서 그 응답을 받아서 처리하지 않으면 아무런 의미가 없기 때문이다.
+두번째 이유는 body에 파일 내용이 담긴 응답을 보낸 것이 잘못이었다.  
+나는 일반적으로 `GET /global.css` 이렇게 파일 요청이 들어왔을 때처럼, 화면에 표시할 파일의 내용을 담아서 보내주었는데, 그게 아니고 리다이렉션할 `주소`를 보내주어야 했던 것.
+그래야 브라우저는 해당 주소로 이동하고, 우리 서버로 GET 요청이 와서 응답이 가능해진다. 이 점을 혼동하는 바람에 해결하느라 시간이 좀 많이 들었다.
 
 
-- create 요청을 받았을 때도 지금 수행 후 빈 body 값을 일단 만들도록 구현했는데 이 부분이 적절한 판단이었을까?
+- 내가 봐도 코드가 리펙토링이 필요한데.. 고칠수록 꼬여간다 ㅠㅠ 애당초 큰 그림을 잘 그려서 설계했다면 좋았을 텐데 아직 이런 관계들을 어떻게 구성할것인지가 어렵다.
 
+### 학습
 
-- accept 메서드가 호출되면 소켓에 대한 연결을 기다리는 상태가 된다. (연결이 이루어질 때까지 block 상태)
-그러다 서버소켓에 요청이 들어오면 서버소켓은 Interrupt를 받아 깨어나고 요청을 받아 소켓을 만듭니다. (현재 프로젝트 코드에서는 connection)
-이제 해당 소켓 객체를 통해서 통신이 이루어진다. 내가 착각했던 부분은 connection 소켓 객체가 클라이언트 쪽에서 요청이 오면서 열린 포트 그 자체라고 생각했기 때문에,
-이 소켓에 포트번호 정보가 필요 없다고 했을 때 혼동이 있었다.
-그치만 포트 번호는 소켓의 식별을 위해 필요한 정보 중 하나이지, 소켓 자체가 포트가 아니다.
+#### [MIME Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
+- mime는 문서나 파일, 바이트 배열의 성격과 형식을 나타낸다. 즉 주고받는 컨텐츠가 어떤 종류의 파일인지 식별이 가능하다.
+주로 HTML 헤더에 Content-Type 필드에서 사용된다.
+- 주로 `타입/서브타입` 형식으로 표시된다. 예를 들면 텍스트 타입을 나타내는 mime 중 하나는 `text/html` 이렇게 표시한다.
+타입은 좀 더 일반적인 범주를 의미하며(text, image, application), 서브타입은 그 중의 정확한 데이터 종류를 의미하게 된다.  
+예를 들면 image 타입 내의 여러 서브타입들 png, gif 등등..
 
-
-- 요청받은 리소스를 찾을 수 없는 경우 어떻게 예외 처리를 해야 할 것이며, 헤더에 그 결과를 어떻게 반영해서 보내줄 수 있을까?
-&rarr; 예외를 터트리고, 그 예외를 위로 올려서 catch로 처리하자. catch의 본문에는 404 헤더를 넣는 부분을 추가하자.
-&rarr; 그런데 기존 헤더를 생성하는 부분은 DataOutputStream에 헤더를 내보내는 부분이 있어서 여기서도 try가 필요하게 된다.. 그러면 두 기능을 메서드 두개로 나눠보자!
-
-### 궁금한 점 분석
-NullPointerException 예외 발생 가능성이 있는 코드가 있었다. 구현되어 있는 내용상 무조건 NullPointerException이 발생하는 상황이었는데,
-해당 예외를 핸들링하도록 하는 부분을 작성하지 않았으므로, 해당 예외가 콘솔창에 표시되어야 했다.
-
-그런데 이런 상황에서 thread pool을 만들어서 pool에 submit 하는 방식으로 서버를 구현할 경우, 해당 예외가 발생하더라도 콘솔 창에 예외가 뜨지 않았다.
-반면 스레드를 이용해서 바로 start로 실행하는 경우, 혹은 pool에 excute로 실행하는 경우에는 예외가 발생했다고 콘솔 창에서 표시되는데 왜 동작 결과가 다른 것일까?
-
-```
-Thread thread = new Thread(new RequestHandler(connection));
-thread.start();
-```
-이렇게 직접 스레드를 가지고 서버를 시작하는 경우 오류가 나는 부분에 도달하면 아래와 같이 표시된다.  
-```
-Exception in thread "Thread-1" java.lang.NullPointerException
-	at java.base/java.util.Objects.requireNonNull(Objects.java:209)
-	at utils.Paths.parsePath(Paths.java:21)
-	at webserver.RequestParser.parsePath(RequestParser.java:70)
-	at webserver.RequestParser.parseFileToByte(RequestParser.java:45)
-	at webserver.RequestHandler.responseProcess(RequestHandler.java:54)
-	at webserver.RequestHandler.run(RequestHandler.java:32)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-Exception in thread "Thread-4" java.lang.NullPointerException
-	at java.base/java.util.Objects.requireNonNull(Objects.java:209)
-	at utils.Paths.parsePath(Paths.java:21)
-	at webserver.RequestParser.parsePath(RequestParser.java:70)
-	at webserver.RequestParser.parseFileToByte(RequestParser.java:45)
-	at webserver.RequestHandler.responseProcess(RequestHandler.java:54)
-	at webserver.RequestHandler.run(RequestHandler.java:32)
-```
-
-반면 submit을 사용해서 다음과 같이 서버를 실행하면
-
-```
-pool.submit(new RequestHandler(connection));
-```
-![정상 콘솔](https://github.com/seondays/LeetCode/assets/110711591/defa4cba-2ca0-4619-a742-daba8c63b33f)
-
-콘솔 창에 아무런 예외가 발생하지 않고 있다. 왜일까?
-
-#### submit()와 execute()
-> Submits a value-returning task for execution and returns a Future representing the pending results of the task.
-
-> Executes the given command at some time in the future.
-
-~작성중~
-
-
-### 알아보기
-- Objects로 null을 핸들링하는 방법들
-- completablefuture
+#### 새롭게 접한 것들
+- String의 lastIndexOf(ch target) : target이 해당 문자열에서 마지막으로 나타난 위치 Index를 반환하는 메서드
+- StringBuffer에 append 하는 경우, 변수값을 주고 싶을 때 -> String.format과 함께 사용하자

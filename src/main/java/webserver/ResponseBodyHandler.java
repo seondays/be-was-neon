@@ -9,15 +9,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.Path;
 
 public class ResponseBodyHandler {
     /**
-     * Response 객체의 body 멤버변수를 위해
-     * Request의 resource가 명령어인지 아니면 파일 요청인지를 처리해서 적절한 body를 만드는 것이 이 객체의 역할이다.
+     * Response 객체의 body 멤버변수를 위해 Request의 resource가 명령어인지 아니면 파일 요청인지를 처리해서 적절한 body를 만드는 것이 이 객체의 역할이다.
      */
     public static final String ELEMENTS_DELIMITER = "&";
     public static final String KEY_VALUE_DELIMITER = "=";
+    private static final Logger logger = LoggerFactory.getLogger(ResponseBodyHandler.class);
     private final Request request;
     private Map<String, Runnable> functionMap;
     private final String fileUrl;
@@ -30,7 +32,7 @@ public class ResponseBodyHandler {
 
     private void initFunctionMap() {
         functionMap = new HashMap<>();
-        functionMap.put("/user/create", this::create);
+        functionMap.put("/create", this::create);
     }
 
     /**
@@ -54,7 +56,7 @@ public class ResponseBodyHandler {
      */
     private byte[] getProcess() throws IOException {
         if (isCreate()) {
-            functionMap.get(request.getResource());
+            functionMap.get(request.getResource()).run();
             return parseFileUrl().getBytes();
         } else {
             return parseFileToByte();
@@ -88,7 +90,9 @@ public class ResponseBodyHandler {
     }
 
     private void create() {
-        Database.addUser(new User(requestInfoToMap(request.getQuery())));
+        User requestUser = new User(requestInfoToMap(request.getQuery()));
+        Database.addUser(requestUser);
+        logger.info(Database.findUserById(requestUser.getUserId()).toString());
     }
 
     /**

@@ -1,10 +1,8 @@
 package webserver;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -15,12 +13,11 @@ public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
-    private HeaderHandler headerHandler;
-    private String header;
+    private String responseHeader;
+    private byte[] responseBody;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
-        headerHandler = new HeaderHandler();
     }
 
     public void run() {
@@ -28,49 +25,38 @@ public class RequestHandler implements Runnable {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            byte[] body = responseProcess(in);
             DataOutputStream dos = new DataOutputStream(out);
-            headerHandler.writeHeader(dos, header);
-            responseBody(dos, body);
+            responseProcess(in);
+            writeHeader(dos, responseHeader);
+            responseBody(dos, responseBody);
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
     }
 
-    /*
-     응답을 하기 위한 과정을 진행하는 메서드.
-     request의 url 종류를 분석하고, 응답해 줄 body 데이터를 반환한다.
-    */
-    public byte[] responseProcess(String requestLine) throws IOException {
-        RequestParser requestParser = new RequestParser(requestLine);
-        byte[] body;
-
-        if (requestParser.isCreate()) {
-            body = requestParser.responseCreate();
-        } else {
-            body = requestParser.parseFileToByte();
+    /**
+     * 응답할 내용을 만드는 과정을 진행한다. Request 객체에 요청을 집어넣고, 필요한 일들을 처리 후 Response 객체에 담는다.
+     * 이후 최종적으로 Response에서 값을 가져와서 응답한다.
+     * todo : Response response = new Response(new RequestProcessor(request)); 이 부분 개선 가능?
+     */
+    private void responseProcess(InputStream in) {
+        try {
+            Request request = new Request(in);
+            Response response = new Response(new ResponseBodyHandler(request));
+            responseHeader = response.getHeader();
+            responseBody = response.getBody();
+        } catch (Exception e) {
+            ErrorHandler errorHandler = new ErrorHandler();
+            responseHeader = errorHandler.getErrorHeader();
+            responseBody = errorHandler.getErrorBody();
         }
-        return body;
     }
 
-    /*
-     응답할 body와 header를 만든다.
-     todo : body를 만드는 동작과, 헤더를 만드는 동작을 분리가 필요해보인다. 어떻게 할 수 있을까?
-     */
-    private byte[] responseProcess(InputStream in) {
-        byte[] body;
+    public void writeHeader(DataOutputStream dos, String header) {
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            String line = br.readLine();
-            logger.debug("request line : {}", line);
-            body =  responseProcess(line);
-            header = headerHandler.make200Header(body.length);
-            return body;
-        } catch (Exception e) {
+            dos.writeBytes(header);
+        } catch (IOException e) {
             logger.error(e.getMessage());
-            body = "<h1>404 NOT FOUND! 요청한 페이지를 찾을 수 없습니다.</h1>".getBytes();
-            header = headerHandler.make404Header(body.length);
-            return body;
         }
     }
 

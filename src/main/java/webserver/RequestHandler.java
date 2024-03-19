@@ -42,7 +42,7 @@ public class RequestHandler implements Runnable {
     private void responseProcess(InputStream in) {
         try {
             Request request = new Request(in);
-            Response response = new Response(new ResponseBodyHandler(request));
+            Response response = new Response(new ResponseBodyHandler(request), new ResponseHeaderHandler(request));
             responseHeader = response.getHeader();
             responseBody = response.getBody();
         } catch (Exception e) {

@@ -26,7 +26,7 @@ public class RequestHandler implements Runnable {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
-            responseProcess(in);
+            createResponse(in);
             writeHeader(dos, responseHeader);
             responseBody(dos, responseBody);
         } catch (IOException e) {
@@ -39,7 +39,7 @@ public class RequestHandler implements Runnable {
      * 이후 최종적으로 Response에서 값을 가져와서 응답한다.
      * todo : Response response = new Response(new RequestProcessor(request)); 이 부분 개선 가능?
      */
-    private void responseProcess(InputStream in) {
+    private void createResponse(InputStream in) {
         try {
             Request request = new Request(in);
             Response response = new Response(new ResponseBodyHandler(request), new ResponseHeaderHandler(request));

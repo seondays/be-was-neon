@@ -8,22 +8,23 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.HttpMethods;
 
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
     private static final String BODY_LENGTH_KEY = "Content-Length";
-    private String httpMethod;
+    private HttpMethods httpMethod;
     private String resource;
     private String query;
     private final Map<String, String> header;
-    private byte[] body;
+    private String body;
 
     public Request(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         header = new HashMap<>();
         readStartLine(br);
         readHeader(br);
-        readBody(in);
+        readBody(br);
     }
 
     /**
@@ -65,20 +66,21 @@ public class Request {
      * 헤더에서 Content-Length 를 가져와서 그 횟수만큼 읽는다.
      * 만일 해당 항목이 없을 경우, 비워져 있는 배열을 반환한다.
      *
-     * @param in
+     * @param
      * @throws IOException
      */
-    private void readBody(InputStream in) throws IOException {
+    private void readBody(BufferedReader br) throws IOException {
         String contentLength = header.get(BODY_LENGTH_KEY);
-        if(contentLength != null) {
+        if (contentLength != null) {
             int bodyLength = Integer.parseInt(contentLength);
-            byte[] body = new byte[bodyLength];
-            in.read(body, 0, bodyLength);
+            char[] charBuffer = new char[bodyLength];
+            br.read(charBuffer, 0, bodyLength);
+            body = new String(charBuffer);
+            logger.debug(body);
         }
-        body = new byte[0];
     }
 
-    public byte[] getBody() {
+    public String getBody() {
         return body;
     }
 
@@ -86,7 +88,7 @@ public class Request {
         return header;
     }
 
-    public String getHttpMethod() {
+    public HttpMethods getHttpMethod() {
         return httpMethod;
     }
 

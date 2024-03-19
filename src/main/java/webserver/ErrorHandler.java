@@ -3,20 +3,30 @@ package webserver;
 public class ErrorHandler {
     private byte[] errorBody;
     private String errorHeader;
-    private final HeaderHandler headerHandler;
 
     /**
-     * 404 말고 다른 에러일 때는 어떻게 처리하지?..
-     * 어떤 예외이냐에 따라서 처리되어야 할 텐데 방법을 아직 잘 모르겠다.
+     * todo : 404 말고 다른 에러일 때 처리 필요
      */
     public ErrorHandler() {
-        this.headerHandler = new HeaderHandler();
         set404Error();
     }
 
     private void set404Error(){
         errorBody = "<h1>404 NOT FOUND!</h1>".getBytes();
-        errorHeader = headerHandler.get404Header(errorBody.length);
+        errorHeader = get404Header(errorBody.length);
+    }
+
+    /**
+     *      우리 서버에서는 404일 경우 정해진 body 타입이 있기 때문에,
+     *      일단은 따로 Content Type을 변수로 주지 않아도 된다.
+     */
+    public String get404Header(int lengthOfBodyContent) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("HTTP/1.1 404 Not Found \r\n");
+        stringBuffer.append("Content-Type: %s;charset=utf-8\r\n");
+        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
+        stringBuffer.append("\r\n");
+        return stringBuffer.toString();
     }
 
     public byte[] getErrorBody() {

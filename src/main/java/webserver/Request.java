@@ -13,6 +13,7 @@ import utils.HttpMethods;
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
     private static final String BODY_LENGTH_KEY = "Content-Length";
+    private RequestParser requestParser;
     private HttpMethods httpMethod;
     private String resource;
     private String query;
@@ -35,7 +36,7 @@ public class Request {
      */
     private void readStartLine(BufferedReader br) throws IOException {
         String firstLine = br.readLine();
-        RequestParser requestParser = new RequestParser(firstLine);
+        requestParser = new RequestParser(firstLine);
         logger.debug("request line : {}", firstLine);
         // GET
         httpMethod = requestParser.getUserMethod();
@@ -52,10 +53,12 @@ public class Request {
      * @throws IOException
      */
     private void readHeader(BufferedReader br) throws IOException {
+        final String HEADER_DELIMITER = ":";
+        final int SPLIT_LIMIT = 2;
         String line = br.readLine();
         while (!line.equals("")) {
             logger.debug("header -> {}", line);
-            String[] headerPieces = line.split(":", 2);
+            String[] headerPieces = line.split(HEADER_DELIMITER, SPLIT_LIMIT);
             header.put(headerPieces[0].trim(), headerPieces[1].trim());
             line = br.readLine();
         }

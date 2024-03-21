@@ -1,107 +1,116 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="../reset.css" rel="stylesheet" />
-    <link href="../global.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="container">
-      <header class="header">
-        <a href="/"><img src="../img/signiture.svg" /></a>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="../reset.css" rel="stylesheet"/>
+    <link href="../global.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/"><img src="../img/signiture.svg"/></a>
         <ul class="header__menu">
-          <li class="header__menu__item">
-            <a class="btn btn_contained btn_size_s" href="/login">로그인</a>
-          </li>
-          <li class="header__menu__item">
-            <a class="btn btn_ghost btn_size_s" href="/registration">
-              회원 가입
-            </a>
-          </li>
+            <li class="header__menu__item">
+                <a class="btn btn_contained btn_size_s" href="/login">로그인</a>
+            </li>
+            <li class="header__menu__item">
+                <a class="btn btn_ghost btn_size_s" href="/registration">
+                    회원 가입
+                </a>
+            </li>
         </ul>
-      </header>
-      <div class="page">
+    </header>
+    <div class="page">
         <h2 class="page-title">회원가입</h2>
-        <form class="form", method="get">
-          <div class="textfield textfield_size_s">
-            <p class="title_textfield">아이디</p>
-            <input
-              class="input_textfield"
-              placeholder="아이디를 입력해주세요"
-              autocomplete="userID"
-            />
-          </div>
-          <div class="textfield textfield_size_s">
-            <p class="title_textfield">닉네임</p>
-            <input
-              class="input_textfield"
-              placeholder="닉네임을 입력해주세요"
-              autocomplete="username"
-            />
-          </div>
-          <div class="textfield textfield_size_s">
-            <p class="title_textfield">비밀번호</p>
-            <input
-              class="input_textfield"
-              type="password"
-              placeholder="비밀번호를 입력해주세요"
-              autocomplete="current-password"
-            />
-          </div>
-          <div class="textfield textfield_size_s">
-            <p class="title_textfield">이메일</p>
-            <input
-                    class="input_textfield"
-                    placeholder="이메일을 입력해주세요"
-                    autocomplete="email"
-            />
-          </div>
-          <button
-            id="registration-btn"
-            class="btn btn_contained btn_size_m"
-            style="margin-top: 24px"
-            type="button"
-          >
-            회원가입
-          </button>
+        <form class="form" , method="get">
+            <div class="textfield textfield_size_s">
+                <p class="title_textfield">아이디</p>
+                <input
+                        class="input_textfield"
+                        placeholder="아이디를 입력해주세요"
+                        autocomplete="userID"
+                />
+            </div>
+            <div class="textfield textfield_size_s">
+                <p class="title_textfield">닉네임</p>
+                <input
+                        class="input_textfield"
+                        placeholder="닉네임을 입력해주세요"
+                        autocomplete="username"
+                />
+            </div>
+            <div class="textfield textfield_size_s">
+                <p class="title_textfield">비밀번호</p>
+                <input
+                        class="input_textfield"
+                        type="password"
+                        placeholder="비밀번호를 입력해주세요"
+                        autocomplete="current-password"
+                />
+            </div>
+            <div class="textfield textfield_size_s">
+                <p class="title_textfield">이메일</p>
+                <input
+                        class="input_textfield"
+                        placeholder="이메일을 입력해주세요"
+                        autocomplete="email"
+                />
+            </div>
+            <button
+                    id="registration-btn"
+                    class="btn btn_contained btn_size_m"
+                    style="margin-top: 24px"
+                    type="button"
+            >
+                회원가입
+            </button>
         </form>
-      </div>
     </div>
-    <script>
-      fetch('http://localhost:8080')
-              .then(response => {
-                console.log("Response status code:", response.status);
-                return response.text();
-              })
-              .then(data => {
-                console.log("Server response:", data);
-              })
-              .catch(error => {
-                console.error('Error:', error);
-              });
+</div>
+<script>
+    fetch('http://localhost:8080')
+        .then(response => {
+            console.log("Response status code:", response.status);
+            return response.text();
+        })
+        .then(data => {
+            console.log("Server response:", data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 
-      document.getElementById('registration-btn').addEventListener('click', function() {
+    document.getElementById('registration-btn').addEventListener('click', function () {
         var userID = document.querySelector('.input_textfield[autocomplete="userID"]').value;
         var name = document.querySelector('.input_textfield[autocomplete="username"]').value;
         var password = document.querySelector('.input_textfield[autocomplete="current-password"]').value;
         var email = document.querySelector('.input_textfield[autocomplete="email"]').value;
-        var url = '/create?userId=' + userID + '&name=' + name + '&password=' + password + '&email=' + email;
-        fetch(url)
-                .then(response => {
-          if (response.ok) {
-            alert('회원가입이 완료되었습니다.');
-            return response.text().then(newUrl => {
-              window.location.href = newUrl;
-            });
-          } else {
-            alert('회원가입에 실패하였습니다.');
-          }
-        })
-                .catch(error => {
-                  console.error('Error:', error);
-                });
-      });
-    </script>
-  </body>
+
+        var userData = {
+            userId: encodeURIComponent(userID),
+            name: encodeURIComponent(name),
+            password: encodeURIComponent(password),
+            email: encodeURIComponent(email)
+        };
+
+        fetch('/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(response => {
+            if (response.redirected) {
+                alert('회원가입이 완료되었습니다.');
+                window.location.href = response.url; // 리다이렉션된 URL로 이동
+            } else {
+                alert('회원가입에 실패하였습니다.');
+            }
+        }).catch(error => {
+            console.error('fetch 에러:', error);
+            alert('서버와의 통신 중 오류가 발생했습니다.');
+        });})
+</script>
+</body>
 </html>

@@ -1,68 +1,57 @@
 # be-was-2024
 코드스쿼드 백엔드 교육용 WAS 2024 개정판
 
-### 필요한 전체 기능 정리
-- 리퀘스트 요청에서 리소스만 뽑아내는 기능
-- 분리한 리소스가 파일인지 디렉토리인지 식별하는 기능
-  - 파일인 경우 해당 파일의 주소를 앞에 추가하여 온전한 path를 만들어주는 기능 필요
-  - 디렉토리일 경우 해당 디렉토리 내부의 index.html을 찾아가도록 하는 기능 필요
-- 요청에 대한 응답 내용을 준비하는 기능
-  - 파일이 존재하는 경우, 해당 파일을 전송하기 위해 바이트 배열로 변경하는 기능 필요
-  - 요청 결과에 따라 헤더를 추가한다
-    - e) 파일이 없는 경우 예외 처리 (헤더를 404로 설정)
-    - 성공적으로 응답을 주는 경우 헤더를 200으로 설정
+## Step4 POST로 회원 가입
+### step4 기능 구현 목록
+- [x] POST로 들어오는 요청에 적절한 응답을 보내는 기능
+- [x] create 요청을 처리한 후, 메인 페이지로 redirection하는 기능
+- [x] 회원가입 기능 POST로 변경
 
-## Step3 다양한 컨텐츠 타입 지원
-### step3 기능 구현 목록
-- [x] 리소스의 컨텐츠 타입 구분을 위해 확장자를 확인하고 식별하는 기능
-- [x] 확장자에 알맞게 헤더의 컨텐츠 타입을 변경하는 기능
-- [x] 리펙토링 시도해보기
+### 설계 및 고민
+- 이번 step에서는 서버로 데이터를 보내기 위한 JS 코드에 관한 여러가지 고민이나 어려움이 있었다.
+  - POST 방식으로 클라이언트가 body를 보내는 형식에도 여러가지가 있었는데, 그중 JSON 형식으로 보내도록 JS코드를 변경했고
+    서버로 들어와서는 자바의 Map으로 저장하도록 했다.
+- Request를 가공해서 Response에 응답할 값으로 저장한 후 이것을 클라이언트로 보내주는 것이 이 서버의 목적이고, 저 둘 사이에서 각종 핸들러들이 목적의 달성을 위해 작업을 하고 있다고 생각하기로 했다.
+&rarr; 이번에 헤더를 만드는 과정에서 Response가 Request가 가지고 있는 값을 이용해야 하는 상황이 생겼다. 그런데 이렇게 되면 기존 구조에 맞지 않는다. header를 위한 handler를 새로 만들자!
 
-### 설계 및 고민 정리
-- 응답 헤더에 content type을 유동적으로 변경해야 한다. 그래서 응답해 줄 최종 URL을 파라미터로 받아서 해당 파일의 mime 타입을 반환하도록 하는 함수를 만들었다.  
-이렇게 단순 리소스(/index.html)로 바로 진행하지 않고, 전체 URL(src/main/resources/static/registration/index.html)로 변경한 후에 mime을 찾도록 한 이유는
-들어온 리소스가 디렉토리일 경우 뒤에 파일을 추가하는 부분도 필요하고, create처럼 특별한 파싱이 필요할 수도 있으므로 안정성을 위해서 최종 URL을 받아서 처리하게 했다.
+### 마주친 문제와 해결 과정
+#### - Request에서 인코딩에 따른 Content length 크기 문제
+기존에 start line만 분석해서 처리하면 됐던 구조에서 이제는 Request body를 읽어서 처리를 해야 하는데 이때 body의 내용을 저장하기 위해 header의 content-length 값을 이용할 수 있다.  
+그래서 헤더에서 해당 항목을 가져와서 그 크기만큼 바이트 배열을 만들었고, 이제 이 배열에 Request body 내용을 읽어와서 저장하면 되는 상황이었다.  
+그런데 생각한대로 해당 배열에 body 내용(여기서는 `{"userId":"java","name":"kim","password":"123","email":"gmail"}`)을 저장한 후 값을 확인해보니 뒤에 이상한 null값들이 들어오는 것을 발견했다.  
+이유가 뭘지 생각하다가 결정적으로 이런 현상은 회원가입시에 한글로 입력이 들어왔을 때만 생긴다는 것을 깨달았고 인코딩 문제라는 것을 알게되었다.
+브라우저에서 서버로 전송될 때 한글을 인코딩 해주기 때문에, content-length의 길이가 이 작업의 영향을 받아서 처음 빈 바이트 배열을 만들 때 크기가 더 크게 잡히는 것이 문제로 보였다.
+이를 위해 JS에서 데이터를 전달해줄때 인코딩 된 상태로 전달해주면 그에 맞게 length가 올바르게 들어올 것이라고 생각해서 JS코드에서 인코딩 하도록 설정했다.
+```
+        var userData = {
+            userId: encodeURI(userID),
+            name: encodeURI(name),
+            password: encodeURI(password),
+            email: encodeURI(email)
+        };
+```
+이렇게 수정하니까 올바르게 남는 부분 없이 배열이 채워지는 것을 확인할 수 있었다.
 
+#### - 응답을 정상적으로 받았음에도, 브라우저에서 redirection이 되지 않는 문제
+결론적으로는 http 통신 시 결과 값 확인하는 법에 미숙했고,
+작성한 JS 코드에서 [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)라는 Fetch API의 인터페이스를 잘 다루지 못해서 생긴 문제였다.
 
-- 회원 가입이 끝나면 바로 로그인 창으로 redirection 시키고 싶었다.  
-이를 위해 클라이언트 쪽에 200 헤더와 login.html의 파일 내용이 담긴 응답을 보내보았다. 그런데 then으로 자바스크립트에서 이후 동작을 지시하고 있음에도 페이지는 alert만 뜨고 반응이 없었다..  
-**[이유]** 작동하지 않았던 두가지 중요한 이유가 있었다. 첫번째로 자바스크립트 코드에서 `window.location.href = newUrl;` 이런 식으로 새로운 주소로 이동하도록 하는 부분이 필요했다.
-응답으로 로그인 창에 대한 정보를 보낸다고 해도 클라이언트(브라우저) 쪽에서 그 응답을 받아서 처리하지 않으면 아무런 의미가 없기 때문이다.
-두번째 이유는 body에 파일 내용이 담긴 응답을 보낸 것이 잘못이었다.  
-나는 일반적으로 `GET /global.css` 이렇게 파일 요청이 들어왔을 때처럼, 화면에 표시할 파일의 내용을 담아서 보내주었는데, 그게 아니고 리다이렉션할 `주소`를 보내주어야 했던 것.
-그래야 브라우저는 해당 주소로 이동하고, 우리 서버로 GET 요청이 와서 응답이 가능해진다. 이 점을 혼동하는 바람에 해결하느라 시간이 좀 많이 들었다.
+유저 정보를 create하는 POST 요청을 하면 정상적으로 저장되고 성공 메시지도 나오는데, 리다이렉션 부분을 설정했음에도 이동하지 않고 화면에 변화가 없었다.  
+디버그로 확인해 보면 헤더랑 바디 내용은 올바르게 보내고 있고, 서버 로그에도 요청이 잘 들어오는데도 반응이 없어서 해결을 위해 자바 서버 코드를 계속 확인하던 중..  
 
+![pic](https://github.com/seondays/LeetCode/assets/110711591/7b96dbd6-9421-4ead-911e-f3ecf198ae1e)  
 
-- 내가 봐도 코드가 리펙토링이 필요한데.. 고칠수록 꼬여간다 ㅠㅠ 애당초 큰 그림을 잘 그려서 설계했다면 좋았을 텐데 아직 이런 관계들을 어떻게 구성할것인지가 어렵다.
+브라우저에서 이렇게 정상적으로 리다이렉션 이후 페이지까지 요청을 하는 것을 뒤늦게 발견했다.
+계속 콘솔에만 값을 찍어가며 확인하다가 헤더 내용을 보고 나니까 서버에서 보내는 데이터 관련 문제는 확실히 아니겠다 싶었고, fetch 부분을 확인해서 수정을 하고 나니까 정상적으로 리다이렉션이 되기 시작했다.
 
 ### 학습
-
-#### [MIME Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
-- mime는 문서나 파일, 바이트 배열의 성격과 형식을 나타낸다. 즉 주고받는 컨텐츠가 어떤 종류의 파일인지 식별이 가능하다.
-주로 HTML 헤더에 Content-Type 필드에서 사용된다.
-- 주로 `타입/서브타입` 형식으로 표시된다. 예를 들면 텍스트 타입을 나타내는 mime 중 하나는 `text/html` 이렇게 표시한다.
-타입은 좀 더 일반적인 범주를 의미하며(text, image, application), 서브타입은 그 중의 정확한 데이터 종류를 의미하게 된다.  
-예를 들면 image 타입 내의 여러 서브타입들 png, gif 등등..
-
-
-#### javadoc 스타일의 주석이란 무엇일까? [🔗](https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html)
-- javadoc란 `/** ... */` 형식을 가지는 특수한 주석들의 API 문서를 생성해주는 JDK 도구입니다.
-- 해당 형식으로 주석을 작성 후 javadoc 명령어를 실행하면 API 문저가 생성되는 것을 확인할 수 있습니다.
-- @ 태그를 이용하여 설명을 추가할 수 있습니다
-- 태그가 있는 경우 자동완성도 지원하는듯 합니다.
-
-```
-/**
-* javadoc style annotation
-* @param  url  an absolute URL giving the base location of the image
-* @param  name the location of the image, relative to the url argument
-* @return      the image at the specified URL
-* @see         Image
-*/
-```
-
-#### 스레드 풀을 생성할 때, 무엇을 기준으로 풀의 개수를 정해야 할까?
-
+### Post Method [📑](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)
+- post 메서드를 이용해 서버로 데이터를 보낼 수 있습니다. 이 때 바디에 데이터를 담아서 보내게 되는데, 이 바디에 담긴 내용의 타입은 헤더에 있는 Content-type에 표시되어 있다.
+- post는 서버에 주로 리소스를 생성하는 역할을 하게 되는데, 따라서 멱등성이 보장되지 않는다. (이것이 put과의 차이점)
+- 주로 HTML form를 통해 요청을 보내는데, 이때 보낼 수 있는 콘텐츠 유형은 `multipart/form-data`, `text/plain`, `application/x-www-form-urlencoded` 등이 있다.
+- fetch() 호출과 같이 HTML 양식 이외의 메서드를 통해 POST 요청을 전송할 수도 있다. 이 경우에는 어떤 타입이든 body에 담길 수 있다.
+    
 #### 새롭게 접한 것들
-- String의 lastIndexOf(ch target) : target이 해당 문자열에서 마지막으로 나타난 위치 Index를 반환하는 메서드
-- StringBuffer에 append 하는 경우, 변수값을 주고 싶을 때 -> String.format과 함께 사용하자
+- 깃 브랜치 이름 변경하기
+  main 브랜치에서 다음과 같은 명령어를 터미널에 입력! `git branch -m old-branch new-branch`
+- js.. 기본적인 문법정도는 알면 좋을 것 같은데..

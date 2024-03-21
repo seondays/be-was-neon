@@ -6,17 +6,17 @@ public class Response {
     private String header;
     private byte[] body;
     private final ResponseBodyHandler responseBodyHandler;
-    private final HeaderHandler headerHandler;
+    private final ResponseHeaderHandler responseHeaderHandler;
 
-    public Response(ResponseBodyHandler responseBodyHandler) throws IOException {
+    public Response(ResponseBodyHandler responseBodyHandler, ResponseHeaderHandler responseHeaderHandler) throws IOException {
         this.responseBodyHandler = responseBodyHandler;
-        this.headerHandler = new HeaderHandler();
+        this.responseHeaderHandler = responseHeaderHandler;
         setting();
     }
 
     private void setting() throws IOException {
         body = responseBodyHandler.bodyProcessing();
-        header = headerHandler.get200Header(body.length, responseBodyHandler.parseFileUrl());
+        header = responseHeaderHandler.createHeader(body.length,responseBodyHandler.getFileUrl());
     }
 
     public byte[] getBody() {

@@ -26,9 +26,10 @@ public class RequestHandler implements Runnable {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
-            responseProcess(in);
+            createResponse(in);
             writeHeader(dos, responseHeader);
-            responseBody(dos, responseBody);
+            writeBody(dos, responseBody);
+            dos.flush();
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
@@ -37,12 +38,13 @@ public class RequestHandler implements Runnable {
     /**
      * 응답할 내용을 만드는 과정을 진행한다. Request 객체에 요청을 집어넣고, 필요한 일들을 처리 후 Response 객체에 담는다.
      * 이후 최종적으로 Response에서 값을 가져와서 응답한다.
-     * todo : Response response = new Response(new RequestProcessor(request)); 이 부분 개선 가능?
      */
-    private void responseProcess(InputStream in) {
+    private void createResponse(InputStream in) {
         try {
             Request request = new Request(in);
-            Response response = new Response(new ResponseBodyHandler(request));
+            ResponseBodyHandler responseBodyHandler = new ResponseBodyHandler(request);
+            ResponseHeaderHandler responseHeaderHandler = new ResponseHeaderHandler(request);
+            Response response = new Response(responseBodyHandler, responseHeaderHandler);
             responseHeader = response.getHeader();
             responseBody = response.getBody();
         } catch (Exception e) {
@@ -60,10 +62,9 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void responseBody(DataOutputStream dos, byte[] body) {
+    private void writeBody(DataOutputStream dos, byte[] body) {
         try {
             dos.write(body, 0, body.length);
-            dos.flush();
         } catch (IOException e) {
             logger.error(e.getMessage());
         }

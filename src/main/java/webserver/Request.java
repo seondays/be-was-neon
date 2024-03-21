@@ -18,11 +18,12 @@ public class Request {
     private String resource;
     private String query;
     private final Map<String, String> header;
-    private String body;
+    private Map<String, String> body;
 
     public Request(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         header = new HashMap<>();
+        body = new HashMap<>();
         readStartLine(br);
         readHeader(br);
         readBody(br);
@@ -78,12 +79,12 @@ public class Request {
             int bodyLength = Integer.parseInt(contentLength);
             char[] charBuffer = new char[bodyLength];
             br.read(charBuffer, 0, bodyLength);
-            body = new String(charBuffer);
-            logger.debug(body);
+            body = requestParser.parseJsonToMap(new String(charBuffer));
+            logger.debug(body.toString());
         }
     }
 
-    public String getBody() {
+    public Map<String, String> getBody() {
         return body;
     }
 

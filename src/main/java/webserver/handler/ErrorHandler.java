@@ -1,4 +1,4 @@
-package webserver;
+package webserver.handler;
 
 public class ErrorHandler {
     private byte[] errorBody;

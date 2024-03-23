@@ -5,7 +5,7 @@ import java.net.URLDecoder;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import webserver.RequestHandler;
+import webserver.handler.RequestHandler;
 
 public class User {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);

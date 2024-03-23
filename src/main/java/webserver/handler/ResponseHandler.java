@@ -6,31 +6,19 @@ import httpMethods.PostHandler;
 import httpResource.CreateHandler;
 import httpResource.LoginHandler;
 import httpResource.LogoutHandler;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import utils.HttpMethods;
-import utils.Path;
 import webserver.Request;
 import webserver.Response;
 
 public class ResponseHandler {
-    /**
-     * Response 객체의 body 멤버변수를 위해 Request의 resource가 명령어인지 아니면 파일 요청인지를 처리해서 적절한 body를 만드는 것이 이 객체의 역할이다.
-     */
-    private static final Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
-    private final Path path;
     private final Request request;
     private Map<String, PostHandler> functionMap;
-    private String fileUrl;
 
     public ResponseHandler(Request request) throws IOException {
         this.request = request;
-        path = new Path();
         initFunctionMap();
     }
 
@@ -58,7 +46,7 @@ public class ResponseHandler {
      * GET method인 경우의 처리
      *
      * @return
-     * @throws IOException
+     * @throws Exception
      */
     private Response getProcess() throws Exception {
         MethodsHandler getHandler = new GetHandler(request);
@@ -68,8 +56,10 @@ public class ResponseHandler {
 
     /**
      * POST method인 경우의 처리
+     * 리소스 요청 종류에 따라서 map에서 알맞은 핸들러를 가져와 처리한다
      *
      * @return
+     * @throws Exception
      */
     private Response postProcess() throws Exception {
         MethodsHandler postHandler = functionMap.get(request.getResource());

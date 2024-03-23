@@ -2,14 +2,11 @@ package httpResource;
 
 import db.Database;
 import httpMethods.PostHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
 
 public class LoginHandler implements PostHandler {
-    private static final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
     private final Request request;
     private byte[] body;
     private String header;

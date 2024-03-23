@@ -1,4 +1,4 @@
-package webserver;
+package webserver.handler;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import webserver.Request;
+import webserver.Response;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -42,11 +44,10 @@ public class RequestHandler implements Runnable {
     private void createResponse(InputStream in) {
         try {
             Request request = new Request(in);
-            ResponseBodyHandler responseBodyHandler = new ResponseBodyHandler(request);
-            ResponseHeaderHandler responseHeaderHandler = new ResponseHeaderHandler(request);
-            Response response = new Response(responseBodyHandler, responseHeaderHandler);
-            responseHeader = response.getHeader();
+            ResponseHandler responseHandler = new ResponseHandler(request);
+            Response response = responseHandler.responseProcessing();
             responseBody = response.getBody();
+            responseHeader = response.getHeader();
         } catch (Exception e) {
             ErrorHandler errorHandler = new ErrorHandler();
             responseHeader = errorHandler.getErrorHeader();

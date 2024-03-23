@@ -66,9 +66,7 @@ public class Request {
     }
 
     /**
-     * request의 body를 읽어온 후, 멤버변수로 저장한다.
-     * 헤더에서 Content-Length 를 가져와서 그 횟수만큼 읽는다.
-     * 만일 해당 항목이 없을 경우, 비워져 있는 배열을 반환한다.
+     * request의 body를 읽어온 후, 멤버변수로 저장한다. 헤더에서 Content-Length 를 가져와서 그 횟수만큼 읽는다. 만일 해당 항목이 없을 경우, 비워져 있는 배열을 반환한다.
      *
      * @param
      * @throws IOException
@@ -79,17 +77,24 @@ public class Request {
             int bodyLength = Integer.parseInt(contentLength);
             char[] charBuffer = new char[bodyLength];
             br.read(charBuffer, 0, bodyLength);
-            body = requestParser.parseJsonToMap(new String(charBuffer));
+            try {
+                // json 형식이 아니라 빈 body가 들어오면 문제가 될 수 있음 (logout?)
+                body = requestParser.parseJsonToMap(new String(charBuffer));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                logger.debug(e.getMessage());
+            }
             logger.debug(body.toString());
         }
+
     }
 
     public Map<String, String> getBody() {
+        logger.info(body.toString());
         return body;
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public String getHeaderValueBy(String key) {
+        return header.get(key);
     }
 
     public HttpMethods getHttpMethod() {

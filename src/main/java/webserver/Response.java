@@ -1,22 +1,20 @@
 package webserver;
 
-import java.io.IOException;
+import httpMethods.MethodsHandler;
 
 public class Response {
     private String header;
     private byte[] body;
-    private final ResponseBodyHandler responseBodyHandler;
-    private final ResponseHeaderHandler responseHeaderHandler;
+    private final MethodsHandler methodsHandler;
 
-    public Response(ResponseBodyHandler responseBodyHandler, ResponseHeaderHandler responseHeaderHandler) throws IOException {
-        this.responseBodyHandler = responseBodyHandler;
-        this.responseHeaderHandler = responseHeaderHandler;
+    public Response(MethodsHandler methodsHandler) {
+        this.methodsHandler = methodsHandler;
         setting();
     }
 
-    private void setting() throws IOException {
-        body = responseBodyHandler.bodyProcessing();
-        header = responseHeaderHandler.createHeader(body.length,responseBodyHandler.getFileUrl());
+    private void setting() {
+        body = methodsHandler.getBody();
+        header = methodsHandler.getHeader();
     }
 
     public byte[] getBody() {

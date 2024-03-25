@@ -3,19 +3,18 @@ package httpMethods;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import utils.Path;
 import utils.ExtensionType;
 import webserver.Request;
+import webserver.handler.AuthenticationHandler;
+import webserver.handler.DynamicHttpHandler;
 
 public class GetHandler implements MethodsHandler {
     private final Request request;
     private byte[] body;
     private String header;
-    private final Path path;
 
     public GetHandler(Request request) {
         this.request = request;
-        path = new Path();
     }
 
     /**
@@ -24,8 +23,16 @@ public class GetHandler implements MethodsHandler {
      * @throws Exception
      */
     public void run() throws Exception {
-        String fileUrl = path.buildURL(request.getResource());
-        body = parseFileToByte(fileUrl);
+        AuthenticationHandler authenticationHandler = new AuthenticationHandler(request);
+        DynamicHttpHandler dynamicHttpHandler = new DynamicHttpHandler();
+        String fileUrl = authenticationHandler.buildUrl(request.getResource());
+        // 동적 파일을 줘야 하는지에 관해 체크한다.
+        if (authenticationHandler.isAuthenticationUser()) {
+            body = dynamicHttpHandler.readBodyAddUserName(fileUrl);
+            header = get200Header(body.length, fileUrl);
+            return;
+        }
+        body = readFileToByte(fileUrl);
         header = get200Header(body.length, fileUrl);
     }
 
@@ -36,7 +43,7 @@ public class GetHandler implements MethodsHandler {
      * @return
      * @throws IOException
      */
-    private byte[] parseFileToByte(String fileUrl) throws IOException {
+    private byte[] readFileToByte(String fileUrl) throws IOException {
         File file = new File(fileUrl);
         FileInputStream fileInputStream = new FileInputStream(file);
         byte[] result = new byte[(int) file.length()];

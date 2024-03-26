@@ -78,14 +78,12 @@ public class Request {
             char[] charBuffer = new char[bodyLength];
             br.read(charBuffer, 0, bodyLength);
             try {
-                // json 형식이 아니라 빈 body가 들어오면 문제가 될 수 있음 (logout?)
+                // json 형식이 아니라 빈 body가 들어오면 문제가 될 수 있음 (logout)
                 body = requestParser.parseJsonToMap(new String(charBuffer));
             } catch (ArrayIndexOutOfBoundsException e) {
                 logger.debug(e.getMessage());
             }
-            logger.debug(body.toString());
         }
-
     }
 
     public Map<String, String> getBody() {

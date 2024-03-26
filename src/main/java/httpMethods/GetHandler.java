@@ -28,7 +28,7 @@ public class GetHandler implements MethodsHandler {
         String fileUrl = authenticationHandler.buildUrl(request.getResource());
         // 동적 파일을 줘야 하는지에 관해 체크한다.
         if (authenticationHandler.isAuthenticationUser()) {
-            body = dynamicHttpHandler.readBodyAddUserName(fileUrl);
+            body = dynamicHttpHandler.readBodyAddUserName(fileUrl, authenticationHandler.getUserName());
             header = get200Header(body.length, fileUrl);
             return;
         }

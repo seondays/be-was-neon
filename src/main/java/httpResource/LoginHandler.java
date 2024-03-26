@@ -55,9 +55,7 @@ public class LoginHandler implements PostHandler {
         stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
         stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
         stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        if (!isCookie()) {
-            stringBuffer.append(String.format("Set-Cookie: sid=%s; Path=/", sid));
-        }
+        stringBuffer.append(String.format("Set-Cookie: sid=%s; Path=/", sid));
         stringBuffer.append("\r\n");
         return stringBuffer.toString();
     }
@@ -82,10 +80,6 @@ public class LoginHandler implements PostHandler {
 
     private String getSuccessRedirection() {
         return "main/index.html";
-    }
-    
-    private boolean isCookie() {
-        return request.getHeaderValueBy("Cookie") != null;
     }
 
     public byte[] makeBody() {

@@ -1,22 +1,22 @@
 package httpResource;
 
 import httpMethods.PostHandler;
+import model.Cookie;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
 
 public class LogoutHandler implements PostHandler {
-    private final Request request;
     private byte[] body;
     private String header;
+    private Cookie cookie;
 
     public LogoutHandler(Request request) {
-        this.request = request;
+        cookie = new Cookie(request);
     }
 
     public void run() throws Exception {
-        // 이거 쿠키에 있는 sid값 -> sid=04934; 스플릿
-        String sid = request.getHeaderValueBy("Cookie").split("=")[1];
+        String sid = cookie.getSid();
         deleteSession(sid);
         body = body();
         header = getCookieDeleteHeader(body.length,sid);

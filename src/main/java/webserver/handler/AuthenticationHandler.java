@@ -1,25 +1,38 @@
 package webserver.handler;
 
 import java.io.FileNotFoundException;
+import model.Cookie;
 import utils.Path;
 import webserver.Request;
 
 public class AuthenticationHandler {
-    private Request request;
-    private Path path;
+    private final Path path;
+    private final Cookie cookie;
 
     public AuthenticationHandler(Request request) {
-        this.request = request;
+        cookie = new Cookie(request);
         path = new Path();
     }
 
-    // 로그인되어 있지 않은 상태에서 로그인하려고 시도하면 다른 페이지로 리다이렉션 한다
-    // todo : 주소들 겹치는 부분 따로 모아서 관리?
+    /**
+     * 인증 수준이 로그인인 페이지가 있는 경우,
+     * 로그인되어 있지 않은 상태에서 해당 페이지에 접근하려고 하면 다른 페이지로 리다이렉션 한다.
+     * @param resource
+     * @return
+     * @throws FileNotFoundException
+     */
     public String buildUrl(String resource) throws FileNotFoundException {
         if (resource.equals("/user/list") && !isAuthenticationUser()) {
             return path.buildURL("/login");
         }
         return path.buildURL(resource);
+    }
+
+    /**
+     * 접속한 사람의 이름 확인
+     */
+    public String getUserName() {
+        return SessionHandler.getUserSession(cookie.getSid()).getName();
     }
 
     /**
@@ -29,22 +42,18 @@ public class AuthenticationHandler {
      */
     public boolean isAuthenticationUser() {
         if (isCookieExist()) {
-            // 이건 쿠키에 있는 sid값 -> sid=04934; 스플릿
-            // 쿠키가 sid 말고 다른 값도 포함되어 있을 경우도 체크해야할듯
-            // todo : 겹치는 부분 리펙토링 필요
-            String sid = request.getHeaderValueBy("Cookie").split("=")[1];
-            return isSessionExist(sid);
+            return isSessionExist();
         }
         return false;
     }
 
     // 쿠키가 존재하는지 체크
     private boolean isCookieExist() {
-        return request.getHeaderValueBy("Cookie") != null;
+        return cookie.getSid() != null;
     }
 
     // 세션이 존재하는지 체크
-    private boolean isSessionExist(String sid) {
-        return SessionHandler.getUserSession(sid) != null;
+    private boolean isSessionExist() {
+        return SessionHandler.getUserSession(cookie.getSid()) != null;
     }
 }

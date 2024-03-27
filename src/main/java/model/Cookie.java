@@ -5,16 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import webserver.Request;
 
+/**
+ * 쿠키에 여러가지 값이 담길 수 있기 때문에 안정적으로 sid의 값을 분리해서 가지고 있도록 하는 cookie 클래스
+ * todo : request 객체에서는 이 쿠키 객체를 모르고 있는데 괜찮은걸까?
+ */
 public class Cookie {
-    // 쿠키에 여러가지 값이 담길 수 있기 때문에 안정적으로 sid의 값을 분리해서 가지고 있도록 하는 cookie 객체.
-    private Request request;
-    private String sid;
-    private String allCookie;
-
     private static final Logger logger = LoggerFactory.getLogger(Cookie.class);
     private static final String SID_DELIMITER = "sid=";
     private static final String COOKIE_KEY = "Cookie";
     private static final String EMPTY_STRING = "";
+    private final Request request;
+    private String sid;
+    private String allCookie;
 
     /**
      * 쿠키의 값들 중에서 필요한 값만을 정확하게 가져오기 위해서 따로 객체 생성

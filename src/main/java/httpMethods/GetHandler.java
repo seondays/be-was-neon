@@ -6,9 +6,10 @@ import java.io.IOException;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.AuthenticationHandler;
-import webserver.handler.DynamicHttpHandler;
+import webserver.handler.DynamicHttpBodyHandler;
 
 public class GetHandler implements MethodsHandler {
+    private static final String USER_LIST_RESOURCE = "/user/list";
     private final Request request;
     private byte[] body;
     private String header;
@@ -24,11 +25,19 @@ public class GetHandler implements MethodsHandler {
      */
     public void run() throws Exception {
         AuthenticationHandler authenticationHandler = new AuthenticationHandler(request);
-        DynamicHttpHandler dynamicHttpHandler = new DynamicHttpHandler();
+        DynamicHttpBodyHandler dynamicHttpBodyHandler = new DynamicHttpBodyHandler();
         String fileUrl = authenticationHandler.buildUrl(request.getResource());
-        // 동적 파일을 줘야 하는지에 관해 체크한다.
+        /**
+         * 동적 파일을 줘야 하는지에 관해 로그인 여부를 체크하고, 여기서 다시 어떤 파일을 요청했느냐에 따라 바디를 다르게 만들어줘야한다.
+         * todo : 이 부분이 AuthenticationHandler의 buildUrl의 분기를 나누는 부분과 로직이 비슷한데.. 개선해 볼 수 없을까?
+          */
         if (authenticationHandler.isAuthenticationUser()) {
-            body = dynamicHttpHandler.readBodyAddUserName(fileUrl, authenticationHandler.getUserName());
+            if (USER_LIST_RESOURCE.equals(request.getResource())) {
+                body = dynamicHttpBodyHandler.readUserListBody(fileUrl);
+                header = get200Header(body.length, fileUrl);
+                return;
+            }
+            body = dynamicHttpBodyHandler.readAddNameBody(fileUrl, authenticationHandler.getUserName());
             header = get200Header(body.length, fileUrl);
             return;
         }
@@ -37,7 +46,7 @@ public class GetHandler implements MethodsHandler {
     }
 
     /**
-     * 응답할 파일 읽어와서 byte[]로 반환
+     * static 인 경우, 응답할 파일 읽어와서 byte[]로 반환
      * todo : 버퍼로 읽어오는 방법으로 수정해보기
      *
      * @return

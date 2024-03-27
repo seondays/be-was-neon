@@ -29,7 +29,7 @@ public class AuthenticationHandler {
     }
 
     /**
-     * 접속한 사람의 이름 확인
+     * 접속한 사람의 이름을 확인한다.
      */
     public String getUserName() {
         return SessionHandler.getUserSession(cookie.getSid()).getName();
@@ -47,12 +47,10 @@ public class AuthenticationHandler {
         return false;
     }
 
-    // 쿠키가 존재하는지 체크
     private boolean isCookieExist() {
         return cookie.getSid() != null;
     }
 
-    // 세션이 존재하는지 체크
     private boolean isSessionExist() {
         return SessionHandler.getUserSession(cookie.getSid()) != null;
     }

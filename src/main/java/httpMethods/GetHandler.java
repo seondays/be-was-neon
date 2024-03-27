@@ -11,8 +11,8 @@ import webserver.handler.DynamicHttpBodyHandler;
 public class GetHandler implements MethodsHandler {
     private static final String USER_LIST_RESOURCE = "/user/list";
     private final Request request;
-    private byte[] body;
-    private String header;
+    private byte[] responseBody;
+    private String responseHeader;
 
     public GetHandler(Request request) {
         this.request = request;
@@ -33,16 +33,16 @@ public class GetHandler implements MethodsHandler {
           */
         if (authenticationHandler.isAuthenticationUser()) {
             if (USER_LIST_RESOURCE.equals(request.getResource())) {
-                body = dynamicHttpBodyHandler.readUserListBody(fileUrl);
-                header = get200Header(body.length, fileUrl);
+                responseBody = dynamicHttpBodyHandler.readUserListBody(fileUrl);
+                responseHeader = get200Header(responseBody.length, fileUrl);
                 return;
             }
-            body = dynamicHttpBodyHandler.readAddNameBody(fileUrl, authenticationHandler.getUserName());
-            header = get200Header(body.length, fileUrl);
+            responseBody = dynamicHttpBodyHandler.readAddNameBody(fileUrl, authenticationHandler.getUserName());
+            responseHeader = get200Header(responseBody.length, fileUrl);
             return;
         }
-        body = readFileToByte(fileUrl);
-        header = get200Header(body.length, fileUrl);
+        responseBody = readFileToByte(fileUrl);
+        responseHeader = get200Header(responseBody.length, fileUrl);
     }
 
     /**
@@ -70,11 +70,11 @@ public class GetHandler implements MethodsHandler {
         return stringBuffer.toString();
     }
 
-    public byte[] getBody() {
-        return body;
+    public byte[] getResponseBody() {
+        return responseBody;
     }
 
-    public String getHeader() {
-        return header;
+    public String getResponseHeader() {
+        return responseHeader;
     }
 }

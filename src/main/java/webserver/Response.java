@@ -13,8 +13,8 @@ public class Response {
     }
 
     private void setting() {
-        body = methodsHandler.getBody();
-        header = methodsHandler.getHeader();
+        body = methodsHandler.getResponseBody();
+        header = methodsHandler.getResponseHeader();
     }
 
     public byte[] getBody() {

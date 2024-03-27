@@ -7,9 +7,9 @@ import webserver.Request;
 import webserver.handler.SessionHandler;
 
 public class LogoutHandler implements PostHandler {
-    private byte[] body;
-    private String header;
-    private Cookie cookie;
+    private byte[] responseBody;
+    private String responseHeader;
+    private final Cookie cookie;
 
     public LogoutHandler(Request request) {
         cookie = new Cookie(request);
@@ -18,13 +18,12 @@ public class LogoutHandler implements PostHandler {
     public void run() throws Exception {
         String sid = cookie.getSid();
         deleteSession(sid);
-        body = body();
-        header = getCookieDeleteHeader(body.length,sid);
+        responseBody = new byte[0];
+        responseHeader = getCookieDeleteHeader(responseBody.length,sid);
     }
 
-    // 세션 삭제
+    // 쿠키값을 읽어서 해당 세션 넘버를 찾아서 삭제
     public void deleteSession(String sid) {
-        // 쿠키값을 읽어서 해당 세션 넘버를 찾아서 삭제
         SessionHandler.deleteSession(sid);
     }
 
@@ -43,15 +42,11 @@ public class LogoutHandler implements PostHandler {
         return stringBuffer.toString();
     }
 
-    public byte[] body() {
-        return new byte[0];
+    public byte[] getResponseBody() {
+        return responseBody;
     }
 
-    public byte[] getBody() {
-        return body;
-    }
-
-    public String getHeader() {
-        return header;
+    public String getResponseHeader() {
+        return responseHeader;
     }
 }

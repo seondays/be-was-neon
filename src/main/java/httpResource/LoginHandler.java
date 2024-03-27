@@ -8,8 +8,8 @@ import webserver.handler.SessionHandler;
 
 public class LoginHandler implements PostHandler {
     private final Request request;
-    private byte[] body;
-    private String header;
+    private byte[] responseBody;
+    private String responseHeader;
 
     public LoginHandler(Request request) {
         this.request = request;
@@ -22,12 +22,12 @@ public class LoginHandler implements PostHandler {
     public void run() {
         if (isValidLogin()) {
             String sid = SessionHandler.generateSessionId();
-            body = makeBody();
-            header = getSuccessHeader(body.length, getSuccessRedirection(), sid);
+            responseBody = makeBody();
+            responseHeader = getSuccessHeader(responseBody.length, getSuccessRedirection(), sid);
             SessionHandler.makeSession(sid, Database.findUserById(request.getBody().get("userId")));
         } else {
-            body = makeBody();
-            header = getFailHeader(body.length, getFailRedirection());
+            responseBody = makeBody();
+            responseHeader = getFailHeader(responseBody.length, getFailRedirection());
         }
     }
 
@@ -86,11 +86,11 @@ public class LoginHandler implements PostHandler {
         return new byte[0];
     }
 
-    public byte[] getBody() {
-        return body;
+    public byte[] getResponseBody() {
+        return responseBody;
     }
 
-    public String getHeader() {
-        return header;
+    public String getResponseHeader() {
+        return responseHeader;
     }
 }

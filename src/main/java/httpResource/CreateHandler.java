@@ -12,8 +12,8 @@ import webserver.Request;
 public class CreateHandler implements PostHandler {
     private static final Logger logger = LoggerFactory.getLogger(CreateHandler.class);
     private final Request request;
-    private byte[] body;
-    private String header;
+    private byte[] responseBody;
+    private String responseHeader;
 
     public CreateHandler(Request request) {
         this.request = request;
@@ -25,8 +25,8 @@ public class CreateHandler implements PostHandler {
     @Override
     public void run() throws FileNotFoundException {
         create();
-        body = body();
-        header = get302Header(body.length, "/");
+        responseBody = new byte[0];
+        responseHeader = get302Header(responseBody.length, "/");
     }
 
     public void create() {
@@ -46,15 +46,11 @@ public class CreateHandler implements PostHandler {
         return stringBuffer.toString();
     }
 
-    public byte[] body() {
-        return new byte[0];
+    public byte[] getResponseBody() {
+        return responseBody;
     }
 
-    public byte[] getBody() {
-        return body;
-    }
-
-    public String getHeader() {
-        return header;
+    public String getResponseHeader() {
+        return responseHeader;
     }
 }

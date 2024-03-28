@@ -7,10 +7,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import model.User;
 import utils.ExtensionType;
 import utils.Path;
 import webserver.Request;
+import webserver.httpElement.HttpResponseHeader;
 
 public class DynamicHttpBodyHandler implements GetHandler {
     public static final String USER_NAME_VIEW = "<p class=\"header__username\">안녕하세요 %s 님</p>";
@@ -18,24 +21,42 @@ public class DynamicHttpBodyHandler implements GetHandler {
     private final Request request;
     private final Path path;
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
+    private Map<String, String> needRedirectionPage;
 
     public DynamicHttpBodyHandler(Request request, Path path) {
         this.request = request;
         this.path = path;
+        initRedirectionPage();
     }
 
+    /**
+     * 인증 여부에 따라 리다이렉션이 필요한 특수한 페이지들을 관리한다.
+     */
+    private void initRedirectionPage() {
+        needRedirectionPage = new HashMap<>();
+        needRedirectionPage.put("/", "/main");
+        needRedirectionPage.put("/login", "/main");
+        needRedirectionPage.put("/registration", "/main");
+    }
+
+    // todo : 분기 줄일 수 있는 방법 고민..
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
         final String fileUrl = path.buildURL(USER_RESOURCE);
-        // todo : 분기 줄일 수 있는 방법 고민 필요. map으로 넣으려면 exception 문제 발생.. 또 핸들러로 나눠야 하나?
+
         if ("/user/list".equals(USER_RESOURCE)) {
             responseBody = readUserListBody(fileUrl);
-            responseHeader = get200Header(responseBody.length, fileUrl);
+            responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
+            return;
+        }
+        if (needRedirectionPage.get(USER_RESOURCE) != null) {
+            responseBody = new byte[0];
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
             return;
         }
         responseBody = readAddNameBody(fileUrl, getUserName());
-        responseHeader = get200Header(responseBody.length, fileUrl);
+        responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
     }
 
     /**
@@ -103,7 +124,7 @@ public class DynamicHttpBodyHandler implements GetHandler {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

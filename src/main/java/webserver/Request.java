@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.HttpMethods;
+import webserver.httpElement.HttpRequestHeader;
 
 public class Request {
     private static final Logger logger = LoggerFactory.getLogger(Request.class);
@@ -17,15 +19,14 @@ public class Request {
     private HttpMethods httpMethod;
     private String resource;
     private String query;
-    private final Map<String, String> header;
+    private final HttpRequestHeader header;
     private Map<String, String> body;
 
     public Request(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-        header = new HashMap<>();
         body = new HashMap<>();
         readStartLine(br);
-        readHeader(br);
+        header = new HttpRequestHeader(readHeader(br));
         readBody(br);
     }
 
@@ -53,16 +54,18 @@ public class Request {
      * @param br
      * @throws IOException
      */
-    private void readHeader(BufferedReader br) throws IOException {
+    private Map<String, String> readHeader(BufferedReader br) throws IOException {
         final String HEADER_DELIMITER = ":";
         final int SPLIT_LIMIT = 2;
         String line = br.readLine();
+        final Map<String, String> bufferedMap = new HashMap<>();
         while (!line.equals("")) {
             logger.debug("header -> {}", line);
             String[] headerPieces = line.split(HEADER_DELIMITER, SPLIT_LIMIT);
-            header.put(headerPieces[0].trim(), headerPieces[1].trim());
+            bufferedMap.put(headerPieces[0].trim(), headerPieces[1].trim());
             line = br.readLine();
         }
+        return Collections.unmodifiableMap(bufferedMap);
     }
 
     /**
@@ -72,7 +75,8 @@ public class Request {
      * @throws IOException
      */
     private void readBody(BufferedReader br) throws IOException {
-        String contentLength = header.get(BODY_LENGTH_KEY);
+//        String contentLength = header.get(BODY_LENGTH_KEY);
+        String contentLength = header.getValueBy(BODY_LENGTH_KEY);
         if (contentLength != null) {
             int bodyLength = Integer.parseInt(contentLength);
             char[] charBuffer = new char[bodyLength];
@@ -91,8 +95,8 @@ public class Request {
         return body;
     }
 
-    public String getHeaderValueBy(String key) {
-        return header.get(key);
+    public HttpRequestHeader getHeader() {
+        return header;
     }
 
     public HttpMethods getHttpMethod() {

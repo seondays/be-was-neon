@@ -1,6 +1,6 @@
 package webserver.handler;
 
-import httpMethods.GetHandler;
+import httpMethods.GetRouter;
 import httpMethods.MethodsHandler;
 import httpMethods.PostHandler;
 import httpResource.CreateHandler;
@@ -49,7 +49,7 @@ public class ResponseHandler {
      * @throws Exception
      */
     private Response getProcess() throws Exception {
-        MethodsHandler getHandler = new GetHandler(request);
+        MethodsHandler getHandler = new GetRouter(request);
         getHandler.run();
         return new Response(getHandler);
     }

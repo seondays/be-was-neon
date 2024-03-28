@@ -5,11 +5,12 @@ import httpMethods.PostHandler;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
+import webserver.httpElement.HttpResponseHeader;
 
 public class LoginHandler implements PostHandler {
     private final Request request;
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
 
     public LoginHandler(Request request) {
         this.request = request;
@@ -23,11 +24,11 @@ public class LoginHandler implements PostHandler {
         if (isValidLogin()) {
             String sid = SessionHandler.generateSessionId();
             responseBody = makeEmptyBody();
-            responseHeader = getSuccessHeader(responseBody.length, getSuccessRedirection(), sid);
+            responseHeader = HttpResponseHeader.make302SetCookieHeader(responseBody.length, getSuccessRedirection(), sid);
             SessionHandler.makeSession(sid, Database.findUserById(request.getBody().get("userId")));
         } else {
             responseBody = makeEmptyBody();
-            responseHeader = getFailHeader(responseBody.length, getFailRedirection());
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length, getFailRedirection());
         }
     }
 
@@ -90,7 +91,7 @@ public class LoginHandler implements PostHandler {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

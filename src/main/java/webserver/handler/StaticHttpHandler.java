@@ -6,13 +6,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import utils.ExtensionType;
 import utils.Path;
 import webserver.Request;
+import webserver.httpElement.HttpResponseHeader;
 
 public class StaticHttpHandler implements GetHandler {
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
     private final Request request;
     private final Path path;
     private Map<String, String> needRedirectionPage;
@@ -41,12 +41,12 @@ public class StaticHttpHandler implements GetHandler {
         final String USER_RESOURCE = request.getResource();
         if (needRedirectionPage.get(USER_RESOURCE) != null) {
             responseBody = new byte[0];
-            responseHeader = get302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
             return;
         }
         String fileUrl = path.buildURL(USER_RESOURCE);
         responseBody = readFileToByte(fileUrl);
-        responseHeader = get200Header(responseBody.length, fileUrl);
+        responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
     }
 
     /**
@@ -64,32 +64,32 @@ public class StaticHttpHandler implements GetHandler {
         return result;
     }
 
-    public String get200Header(int lengthOfBodyContent, String fileUrl) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 200 OK\r\n");
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
-
-    public String get302Header(int lengthOfBodyContent, String fileUrl) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
+//    public String get200Header(int lengthOfBodyContent, String fileUrl) {
+//        String contentType = ExtensionType.getContentType(fileUrl);
+//        StringBuffer stringBuffer = new StringBuffer();
+//        stringBuffer.append("HTTP/1.1 200 OK\r\n");
+//        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
+//        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
+//        stringBuffer.append("\r\n");
+//        return stringBuffer.toString();
+//    }
+//
+//    public String get302Header(int lengthOfBodyContent, String fileUrl) {
+//        String contentType = ExtensionType.getContentType(fileUrl);
+//        StringBuffer stringBuffer = new StringBuffer();
+//        stringBuffer.append("HTTP/1.1 302 Found\r\n");
+//        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
+//        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
+//        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
+//        stringBuffer.append("\r\n");
+//        return stringBuffer.toString();
+//    }
 
     public byte[] getResponseBody() {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

@@ -1,9 +1,10 @@
 package webserver;
 
 import httpMethods.MethodsHandler;
+import webserver.httpElement.HttpResponseHeader;
 
 public class Response {
-    private String header;
+    private HttpResponseHeader header;
     private byte[] body;
     private final MethodsHandler methodsHandler;
 
@@ -21,7 +22,7 @@ public class Response {
         return body;
     }
 
-    public String getHeader() {
+    public HttpResponseHeader getHeader() {
         return header;
     }
 }

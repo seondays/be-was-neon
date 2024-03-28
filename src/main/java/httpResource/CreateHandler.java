@@ -8,12 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.ExtensionType;
 import webserver.Request;
+import webserver.httpElement.HttpResponseHeader;
 
 public class CreateHandler implements PostHandler {
     private static final Logger logger = LoggerFactory.getLogger(CreateHandler.class);
     private final Request request;
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
 
     public CreateHandler(Request request) {
         this.request = request;
@@ -26,7 +27,7 @@ public class CreateHandler implements PostHandler {
     public void run() throws FileNotFoundException {
         create();
         responseBody = new byte[0];
-        responseHeader = get302Header(responseBody.length, "/");
+        responseHeader = HttpResponseHeader.make302Header(responseBody.length, "/");
     }
 
     public void create() {
@@ -50,7 +51,7 @@ public class CreateHandler implements PostHandler {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

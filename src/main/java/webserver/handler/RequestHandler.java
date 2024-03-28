@@ -47,7 +47,7 @@ public class RequestHandler implements Runnable {
             ResponseHandler responseHandler = new ResponseHandler(request);
             Response response = responseHandler.responseProcessing();
             responseBody = response.getBody();
-            responseHeader = response.getHeader();
+            responseHeader = response.getHeader().toString();
         } catch (Exception e) {
             ErrorHandler errorHandler = new ErrorHandler();
             responseHeader = errorHandler.getErrorHeader();

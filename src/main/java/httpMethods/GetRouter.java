@@ -1,26 +1,17 @@
 package httpMethods;
 
-import httpResource.AddNameHandler;
-import httpResource.CreateHandler;
-import httpResource.LoginHandler;
-import httpResource.LogoutHandler;
-import httpResource.MakeUserListHandler;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import utils.Path;
 import webserver.Request;
 import webserver.handler.AuthenticationHandler;
 import webserver.handler.DynamicHttpBodyHandler;
 import webserver.handler.StaticHttpHandler;
+import webserver.httpElement.HttpResponseHeader;
 
 public class GetRouter implements MethodsHandler {
     private final AuthenticationHandler authenticationHandler;
     private final Request request;
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
     Path path;
 
     public GetRouter(Request request) {
@@ -50,7 +41,7 @@ public class GetRouter implements MethodsHandler {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

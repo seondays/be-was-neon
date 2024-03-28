@@ -4,10 +4,11 @@ import httpMethods.PostHandler;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
+import webserver.httpElement.HttpResponseHeader;
 
 public class LogoutHandler implements PostHandler {
     private byte[] responseBody;
-    private String responseHeader;
+    private HttpResponseHeader responseHeader;
     private final Request request;
 
     public LogoutHandler(Request request) {
@@ -18,7 +19,7 @@ public class LogoutHandler implements PostHandler {
         String sid = request.getHeader().getSidCookie();
         deleteSession(sid);
         responseBody = makeEmptyBody();
-        responseHeader = getCookieDeleteHeader(responseBody.length,sid);
+        responseHeader = HttpResponseHeader.make302DeleteCookieHeader(responseBody.length,sid);
     }
 
     // 쿠키값을 읽어서 해당 세션 넘버를 찾아서 삭제
@@ -49,7 +50,7 @@ public class LogoutHandler implements PostHandler {
         return responseBody;
     }
 
-    public String getResponseHeader() {
+    public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 }

@@ -1,38 +1,12 @@
 package webserver.handler;
 
-import java.io.FileNotFoundException;
-import model.Cookie;
-import utils.Path;
 import webserver.Request;
 
 public class AuthenticationHandler {
-    private final Path path;
-    private final Cookie cookie;
+    private final Request request;
 
     public AuthenticationHandler(Request request) {
-        cookie = new Cookie(request);
-        path = new Path();
-    }
-
-    /**
-     * 인증 수준이 로그인인 페이지가 있는 경우,
-     * 로그인되어 있지 않은 상태에서 해당 페이지에 접근하려고 하면 다른 페이지로 리다이렉션 한다.
-     * @param resource
-     * @return
-     * @throws FileNotFoundException
-     */
-    public String buildUrl(String resource) throws FileNotFoundException {
-        if (resource.equals("/user/list") && !isAuthenticationUser()) {
-            return path.buildURL("/login");
-        }
-        return path.buildURL(resource);
-    }
-
-    /**
-     * 접속한 사람의 이름을 확인한다.
-     */
-    public String getUserName() {
-        return SessionHandler.getUserSession(cookie.getSid()).getName();
+        this.request = request;
     }
 
     /**
@@ -48,10 +22,10 @@ public class AuthenticationHandler {
     }
 
     private boolean isCookieExist() {
-        return cookie.getSid() != null;
+        return request.getHeader().getSidCookie() != null;
     }
 
     private boolean isSessionExist() {
-        return SessionHandler.getUserSession(cookie.getSid()) != null;
+        return SessionHandler.getUserSession(request.getHeader().getSidCookie()) != null;
     }
 }

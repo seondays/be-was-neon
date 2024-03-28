@@ -22,11 +22,11 @@ public class LoginHandler implements PostHandler {
     public void run() {
         if (isValidLogin()) {
             String sid = SessionHandler.generateSessionId();
-            responseBody = makeBody();
+            responseBody = makeEmptyBody();
             responseHeader = getSuccessHeader(responseBody.length, getSuccessRedirection(), sid);
             SessionHandler.makeSession(sid, Database.findUserById(request.getBody().get("userId")));
         } else {
-            responseBody = makeBody();
+            responseBody = makeEmptyBody();
             responseHeader = getFailHeader(responseBody.length, getFailRedirection());
         }
     }
@@ -82,7 +82,7 @@ public class LoginHandler implements PostHandler {
         return "main/index.html";
     }
 
-    public byte[] makeBody() {
+    private byte[] makeEmptyBody() {
         return new byte[0];
     }
 

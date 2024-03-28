@@ -1,7 +1,6 @@
 package httpResource;
 
 import httpMethods.PostHandler;
-import model.Cookie;
 import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
@@ -9,16 +8,16 @@ import webserver.handler.SessionHandler;
 public class LogoutHandler implements PostHandler {
     private byte[] responseBody;
     private String responseHeader;
-    private final Cookie cookie;
+    private final Request request;
 
     public LogoutHandler(Request request) {
-        cookie = new Cookie(request);
+        this.request = request;
     }
 
     public void run() throws Exception {
-        String sid = cookie.getSid();
+        String sid = request.getHeader().getSidCookie();
         deleteSession(sid);
-        responseBody = new byte[0];
+        responseBody = makeEmptyBody();
         responseHeader = getCookieDeleteHeader(responseBody.length,sid);
     }
 
@@ -40,6 +39,10 @@ public class LogoutHandler implements PostHandler {
         stringBuffer.append(String.format("Set-Cookie: sid=%s; Max-Age= 0; Path=/", sid));
         stringBuffer.append("\r\n");
         return stringBuffer.toString();
+    }
+
+    private byte[] makeEmptyBody() {
+        return new byte[0];
     }
 
     public byte[] getResponseBody() {

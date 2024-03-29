@@ -36,17 +36,6 @@ public class CreateHandler implements PostHandler {
         logger.info(Database.findUserById(requestUser.getUserId()).toString());
     }
 
-    public String get302Header(int lengthOfBodyContent, String fileUrl) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
-
     public byte[] getResponseBody() {
         return responseBody;
     }

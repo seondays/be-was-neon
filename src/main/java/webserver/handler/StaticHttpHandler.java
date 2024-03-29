@@ -40,7 +40,7 @@ public class StaticHttpHandler implements GetHandler {
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
         if (needRedirectionPage.get(USER_RESOURCE) != null) {
-            responseBody = new byte[0];
+            responseBody = makeEmptyBody();
             responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
             return;
         }
@@ -64,26 +64,14 @@ public class StaticHttpHandler implements GetHandler {
         return result;
     }
 
-//    public String get200Header(int lengthOfBodyContent, String fileUrl) {
-//        String contentType = ExtensionType.getContentType(fileUrl);
-//        StringBuffer stringBuffer = new StringBuffer();
-//        stringBuffer.append("HTTP/1.1 200 OK\r\n");
-//        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-//        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-//        stringBuffer.append("\r\n");
-//        return stringBuffer.toString();
-//    }
-//
-//    public String get302Header(int lengthOfBodyContent, String fileUrl) {
-//        String contentType = ExtensionType.getContentType(fileUrl);
-//        StringBuffer stringBuffer = new StringBuffer();
-//        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-//        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
-//        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-//        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-//        stringBuffer.append("\r\n");
-//        return stringBuffer.toString();
-//    }
+    /**
+     * 빈 배열로 응답할 경우, 바로 new로 생성하는 것보다
+     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
+     * @return 빈 바이트 배열
+     */
+    private byte[] makeEmptyBody() {
+        return new byte[0];
+    }
 
     public byte[] getResponseBody() {
         return responseBody;

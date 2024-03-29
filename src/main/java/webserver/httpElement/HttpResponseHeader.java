@@ -39,6 +39,12 @@ public class HttpResponseHeader {
         return httpResponseHeader;
     }
 
+    public static HttpResponseHeader make404Header(int lengthOfBodyContent) {
+        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+        httpResponseHeader.set404Header(lengthOfBodyContent);
+        return httpResponseHeader;
+    }
+
     private void set200header(int lengthOfBodyContent, String fileUrl) {
         String contentType = ExtensionType.getContentType(fileUrl);
         httpVersion = "HTTP/1.1";
@@ -76,6 +82,13 @@ public class HttpResponseHeader {
         headers.put("Content-Length", String.valueOf(lengthOfBodyContent));
         headers.put("Location", redirection);
         headers.put("Set-Cookie",String.format("sid=%s; Max-Age= 0; Path=/", sid));
+    }
+
+    private void set404Header(int lengthOfBodyContent) {
+        httpVersion = "HTTP/1.1";
+        statusCode = "404 Not Found";
+        headers.put("Content-Type", "%s;charset=utf-8");
+        headers.put("Content-Length", String.valueOf(lengthOfBodyContent));
     }
 
     public String toString() {

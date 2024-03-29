@@ -2,7 +2,6 @@ package httpResource;
 
 import db.Database;
 import httpMethods.PostHandler;
-import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
 import webserver.httpElement.HttpResponseHeader;
@@ -49,31 +48,9 @@ public class LoginHandler implements PostHandler {
         }
     }
 
-    public String getSuccessHeader(int lengthOfBodyContent, String fileUrl, String sid) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append(String.format("Set-Cookie: sid=%s; Path=/", sid));
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
-
-    public String getFailHeader(int lengthOfBodyContent, String fileUrl) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-        stringBuffer.append(String.format("Location: %s\r\n", fileUrl));
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
-
     /**
      * 성공하면 -> 헤더 값을 추가(SID=세션 ID) and 메인으로 리다이렉트 실패하면 -> 실패 창으로 리다이렉트하기위한 주소 생성
+     * @return 리다이렉트 주소
      */
     private String getFailRedirection() {
         return "/login/login_failed.html";
@@ -83,6 +60,11 @@ public class LoginHandler implements PostHandler {
         return "main/index.html";
     }
 
+    /**
+     * post 요청의 경우 빈 배열로 응답하는데, 바로 new로 생성하는 것보다
+     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
+     * @return 빈 바이트 배열
+     */
     private byte[] makeEmptyBody() {
         return new byte[0];
     }

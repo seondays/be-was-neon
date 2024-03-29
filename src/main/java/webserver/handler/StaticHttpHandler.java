@@ -30,6 +30,7 @@ public class StaticHttpHandler implements GetHandler {
         needRedirectionPage = new HashMap<>();
         needRedirectionPage.put("/user/list", "/login");
         needRedirectionPage.put("/main", "/");
+        needRedirectionPage.put("/article","/login");
     }
 
     /**

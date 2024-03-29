@@ -75,16 +75,15 @@ public class Request {
      * @throws IOException
      */
     private void readBody(BufferedReader br) throws IOException {
-//        String contentLength = header.get(BODY_LENGTH_KEY);
         String contentLength = header.getValueBy(BODY_LENGTH_KEY);
         if (contentLength != null) {
             int bodyLength = Integer.parseInt(contentLength);
             char[] charBuffer = new char[bodyLength];
             br.read(charBuffer, 0, bodyLength);
             try {
-                // json 형식이 아니라 빈 body가 들어오면 문제가 될 수 있음 (logout)
                 body = requestParser.parseJsonToMap(new String(charBuffer));
             } catch (ArrayIndexOutOfBoundsException e) {
+                // todo : 추후 흐름 다르게 분기 필요
                 logger.debug(e.getMessage());
             }
         }

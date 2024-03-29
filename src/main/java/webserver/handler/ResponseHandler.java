@@ -32,7 +32,7 @@ public class ResponseHandler {
     /**
      * body를 어떤 방법으로 처리할지 Method를 통해 분기를 나눈 후 그에 맞게 처리한다.
      *
-     * @return
+     * @return 응답 객체 생성
      * @throws IOException
      */
     public Response responseProcessing() throws Exception {
@@ -45,7 +45,7 @@ public class ResponseHandler {
     /**
      * GET method인 경우의 처리
      *
-     * @return
+     * @return 응답 객체 생성
      * @throws Exception
      */
     private Response getProcess() throws Exception {
@@ -58,7 +58,7 @@ public class ResponseHandler {
      * POST method인 경우의 처리
      * 리소스 요청 종류에 따라서 map에서 알맞은 핸들러를 가져와 처리한다
      *
-     * @return
+     * @return 응답 객체 생성
      * @throws Exception
      */
     private Response postProcess() throws Exception {

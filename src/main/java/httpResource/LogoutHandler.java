@@ -1,7 +1,6 @@
 package httpResource;
 
 import httpMethods.PostHandler;
-import utils.ExtensionType;
 import webserver.Request;
 import webserver.handler.SessionHandler;
 import webserver.httpElement.HttpResponseHeader;
@@ -27,21 +26,11 @@ public class LogoutHandler implements PostHandler {
         SessionHandler.deleteSession(sid);
     }
 
-    // 쿠키를 삭제한다는 것은 헤더에 다시 만료된 헤더를 담어주는 것
-    public String getCookieDeleteHeader(int lengthOfBodyContent, String sid) {
-        String redirection = "/index.html";
-        String contentType = ExtensionType.getContentType(redirection);
-
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 302 Found\r\n");
-        stringBuffer.append(String.format("Location: %s\r\n", redirection));
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append(String.format("Set-Cookie: sid=%s; Max-Age= 0; Path=/", sid));
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
-    }
-
+    /**
+     * post 요청의 경우 빈 배열로 응답하는데, 바로 new로 생성하는 것보다
+     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
+     * @return 빈 바이트 배열
+     */
     private byte[] makeEmptyBody() {
         return new byte[0];
     }

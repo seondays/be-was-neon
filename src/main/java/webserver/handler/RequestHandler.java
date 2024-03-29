@@ -37,10 +37,6 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    /**
-     * 응답할 내용을 만드는 과정을 진행한다. Request 객체에 요청을 집어넣고, 필요한 일들을 처리 후 Response 객체에 담는다.
-     * 이후 최종적으로 Response에서 값을 가져와서 응답한다.
-     */
     private void createResponse(InputStream in) {
         try {
             Request request = new Request(in);
@@ -50,12 +46,12 @@ public class RequestHandler implements Runnable {
             responseHeader = response.getHeader().toString();
         } catch (Exception e) {
             ErrorHandler errorHandler = new ErrorHandler();
-            responseHeader = errorHandler.getErrorHeader();
+            responseHeader = errorHandler.getErrorHeader().toString();
             responseBody = errorHandler.getErrorBody();
         }
     }
 
-    public void writeHeader(DataOutputStream dos, String header) {
+    private void writeHeader(DataOutputStream dos, String header) {
         try {
             dos.writeBytes(header);
         } catch (IOException e) {

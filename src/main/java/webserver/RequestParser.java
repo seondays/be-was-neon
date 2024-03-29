@@ -29,6 +29,7 @@ public class RequestParser {
         return "";
     }
 
+    // todo : 위치 고민 필요
     public Map<String, String> parseJsonToMap(String info) {
         // 중괄호와 콜론 제거
         info = info.substring(1, info.length() - 1).replaceAll(JSON_TEXT_MARK, "");

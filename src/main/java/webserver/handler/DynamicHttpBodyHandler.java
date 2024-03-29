@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import model.User;
-import utils.ExtensionType;
 import utils.Path;
 import webserver.Request;
 import webserver.httpElement.HttpResponseHeader;
@@ -31,7 +30,7 @@ public class DynamicHttpBodyHandler implements GetHandler {
     }
 
     /**
-     * 인증 여부에 따라 리다이렉션이 필요한 특수한 페이지들을 관리한다.
+     * 인증 여부에 따라 리다이렉션이 필요한 특수한 리소스들을 관리한다.
      */
     private void initRedirectionPage() {
         needRedirectionPage = new HashMap<>();
@@ -40,7 +39,12 @@ public class DynamicHttpBodyHandler implements GetHandler {
         needRedirectionPage.put("/registration", "/main");
     }
 
-    // todo : 분기 줄일 수 있는 방법 고민..
+    // todo : 분기 줄일 수 있는 방법 고민 필요
+    /**
+     * 리소스에 따라 body를 만들어야 하는 부분이 달라지기 때문에 이를 분기하고,
+     * 로그인 인증 여부에 따라서 리다이렉션이 필요한 리소스들을 관리하여 그곳으로의 접근을 막는다.
+     * @throws Exception
+     */
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
         final String fileUrl = path.buildURL(USER_RESOURCE);
@@ -51,7 +55,7 @@ public class DynamicHttpBodyHandler implements GetHandler {
             return;
         }
         if (needRedirectionPage.get(USER_RESOURCE) != null) {
-            responseBody = new byte[0];
+            responseBody = makeEmptyBody();
             responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
             return;
         }
@@ -110,14 +114,13 @@ public class DynamicHttpBodyHandler implements GetHandler {
         return SessionHandler.getUserSession(request.getHeader().getSidCookie()).getName();
     }
 
-    public String get200Header(int lengthOfBodyContent, String fileUrl) {
-        String contentType = ExtensionType.getContentType(fileUrl);
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("HTTP/1.1 200 OK\r\n");
-        stringBuffer.append(String.format("Content-Type: %s;charset=utf-8\r\n", contentType));
-        stringBuffer.append("Content-Length: " + lengthOfBodyContent + "\r\n");
-        stringBuffer.append("\r\n");
-        return stringBuffer.toString();
+    /**
+     * post 요청의 경우 빈 배열로 응답하는데, 바로 new로 생성하는 것보다
+     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
+     * @return 빈 바이트 배열
+     */
+    private byte[] makeEmptyBody() {
+        return new byte[0];
     }
 
     public byte[] getResponseBody() {

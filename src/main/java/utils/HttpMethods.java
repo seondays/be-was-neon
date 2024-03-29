@@ -10,7 +10,7 @@ public enum HttpMethods {
      * String 형식으로 들어온 http 메서드를 Enum 타입과 매칭한다.
      * 유효하지 않은 메서드인 경우 예외를 발생시킨다.
      * @param stringMethod
-     * @return
+     * @return 일치하는 http 메서드 타입
      */
     public static HttpMethods matchMethods(String stringMethod) {
         return Arrays.stream(values())

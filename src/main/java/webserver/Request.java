@@ -1,9 +1,9 @@
 package webserver;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,21 +23,43 @@ public class Request {
     private Map<String, String> body;
 
     public Request(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
         body = new HashMap<>();
-        readStartLine(br);
-        header = new HttpRequestHeader(readHeader(br));
-        readBody(br);
+        readStartLine(bufferedInputStream);
+        header = new HttpRequestHeader(readHeader(bufferedInputStream));
+        readBody(bufferedInputStream);
+    }
+
+    /**
+     * stream에서 \r\n을 기준으로 한 줄을 읽는다.
+     *
+     * @param stream
+     * @return
+     * @throws IOException
+     */
+    private String readOneLine(BufferedInputStream stream) throws IOException {
+        ByteArrayOutputStream tmp_holder = new ByteArrayOutputStream();
+        int nowByte;
+        while ((nowByte = stream.read()) != -1) {
+            if (nowByte == '\r') {
+                continue;
+            }
+            if (nowByte == '\n') {
+                break;
+            }
+            tmp_holder.write(nowByte);
+        }
+        return tmp_holder.toString("UTF-8");
     }
 
     /**
      * request의 start-line을 읽어와서 파싱 후, 멤버변수로 저장한다.
      *
-     * @param br
+     * @param stream
      * @throws IOException
      */
-    private void readStartLine(BufferedReader br) throws IOException {
-        String firstLine = br.readLine();
+    private void readStartLine(BufferedInputStream stream) throws IOException {
+        String firstLine = readOneLine(stream);
         requestParser = new RequestParser(firstLine);
         logger.debug("request line : {}", firstLine);
         // GET
@@ -51,40 +73,47 @@ public class Request {
     /**
      * request의 header를 읽어온 후, map 멤버변수로 저장한다.
      *
-     * @param br
+     * @param stream
+     * @return
      * @throws IOException
      */
-    private Map<String, String> readHeader(BufferedReader br) throws IOException {
+    private Map<String, String> readHeader(BufferedInputStream stream) throws IOException {
         final String HEADER_DELIMITER = ":";
         final int SPLIT_LIMIT = 2;
-        String line = br.readLine();
         final Map<String, String> bufferedMap = new HashMap<>();
-        while (!line.equals("")) {
-            logger.debug("header -> {}", line);
-            String[] headerPieces = line.split(HEADER_DELIMITER, SPLIT_LIMIT);
+        String nowLine;
+
+        while (!(nowLine = readOneLine(stream)).equals("")) {
+            logger.debug("header -> {}", nowLine);
+            String[] headerPieces = nowLine.split(HEADER_DELIMITER, SPLIT_LIMIT);
             bufferedMap.put(headerPieces[0].trim(), headerPieces[1].trim());
-            line = br.readLine();
         }
         return Collections.unmodifiableMap(bufferedMap);
     }
 
+
     /**
-     * request의 body를 읽어온 후, 멤버변수로 저장한다. 헤더에서 Content-Length 를 가져와서 그 횟수만큼 읽는다. 만일 해당 항목이 없을 경우, 비워져 있는 배열을 반환한다.
+     * request의 body를 읽어온 후, 멤버변수로 저장한다. 헤더에서 Content-Length 를 가져와서 그 횟수만큼 읽는다.
      *
-     * @param
+     * @param stream
      * @throws IOException
      */
-    private void readBody(BufferedReader br) throws IOException {
+    private void readBody(BufferedInputStream stream) throws IOException {
         String contentLength = header.getValueBy(BODY_LENGTH_KEY);
+        int bufferSize = 1024;
+        byte[] tmp;
         if (contentLength != null) {
             int bodyLength = Integer.parseInt(contentLength);
-            char[] charBuffer = new char[bodyLength];
-            br.read(charBuffer, 0, bodyLength);
+            tmp = new byte[bodyLength];
+            while (bodyLength > 0) {
+                int bytesToRead = Math.min(bufferSize, bodyLength);
+                stream.read(tmp, 0, bytesToRead);
+                bodyLength -= bufferSize;
+            }
             try {
-                body = requestParser.parseJsonToMap(new String(charBuffer));
+                body = requestParser.parseJsonToMap(new String(tmp));
             } catch (ArrayIndexOutOfBoundsException e) {
-                // todo : 추후 흐름 다르게 분기 필요
-                logger.debug(e.getMessage());
+                logger.error(e.getMessage());
             }
         }
     }

@@ -12,6 +12,7 @@ import java.util.Map;
 import model.User;
 import utils.Path;
 import webserver.Request;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class DynamicHttpBodyHandler implements GetHandler {
@@ -19,7 +20,7 @@ public class DynamicHttpBodyHandler implements GetHandler {
     public static final String NEW_LINE = "\n";
     private final Request request;
     private final Path path;
-    private byte[] responseBody;
+    private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
     private Map<String, String> needRedirectionPage;
 
@@ -50,17 +51,17 @@ public class DynamicHttpBodyHandler implements GetHandler {
         final String fileUrl = path.buildURL(USER_RESOURCE);
 
         if ("/user/list".equals(USER_RESOURCE)) {
-            responseBody = readUserListBody(fileUrl);
-            responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
+            responseBody = new HttpResponseBody(readUserListBody(fileUrl));
+            responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
             return;
         }
         if (needRedirectionPage.get(USER_RESOURCE) != null) {
-            responseBody = makeEmptyBody();
-            responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
+            responseBody = new HttpResponseBody();
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length(), needRedirectionPage.get(USER_RESOURCE));
             return;
         }
-        responseBody = readAddNameBody(fileUrl, getUserName());
-        responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
+        responseBody = new HttpResponseBody(readAddNameBody(fileUrl, getUserName()));
+        responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
     }
 
     /**
@@ -111,19 +112,11 @@ public class DynamicHttpBodyHandler implements GetHandler {
     }
 
     private String getUserName() {
+        // todo
         return SessionHandler.getUserSession(request.getHeader().getSidCookie()).getName();
     }
 
-    /**
-     * post 요청의 경우 빈 배열로 응답하는데, 바로 new로 생성하는 것보다
-     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
-     * @return 빈 바이트 배열
-     */
-    private byte[] makeEmptyBody() {
-        return new byte[0];
-    }
-
-    public byte[] getResponseBody() {
+    public HttpResponseBody getResponseBody() {
         return responseBody;
     }
 

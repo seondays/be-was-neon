@@ -4,11 +4,12 @@ import db.Database;
 import httpMethods.PostHandler;
 import webserver.Request;
 import webserver.handler.SessionHandler;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class LoginHandler implements PostHandler {
     private final Request request;
-    private byte[] responseBody;
+    private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
 
     public LoginHandler(Request request) {
@@ -22,12 +23,12 @@ public class LoginHandler implements PostHandler {
     public void run() {
         if (isValidLogin()) {
             String sid = SessionHandler.generateSessionId();
-            responseBody = makeEmptyBody();
-            responseHeader = HttpResponseHeader.make302SetCookieHeader(responseBody.length, getSuccessRedirection(), sid);
-            SessionHandler.makeSession(sid, Database.findUserById(request.getBody().get("userId")));
+            responseBody = new HttpResponseBody();
+            responseHeader = HttpResponseHeader.make302SetCookieHeader(responseBody.length(), getSuccessRedirection(), sid);
+            SessionHandler.makeSession(sid, Database.findUserById(request.getBody().getUserId()));
         } else {
-            responseBody = makeEmptyBody();
-            responseHeader = HttpResponseHeader.make302Header(responseBody.length, getFailRedirection());
+            responseBody = new HttpResponseBody();
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length(), getFailRedirection());
         }
     }
 
@@ -37,8 +38,8 @@ public class LoginHandler implements PostHandler {
      */
     private boolean isValidLogin() {
         try {
-            String targetUserId = request.getBody().get("userId");
-            String targetPassword = request.getBody().get("password");
+            String targetUserId = request.getBody().getUserId();
+            String targetPassword = request.getBody().getPassword();
             String expectedUserID = Database.findUserById(targetUserId).getUserId();
             String expectedPassword = Database.findUserById(targetUserId).getPassword();
 
@@ -69,7 +70,7 @@ public class LoginHandler implements PostHandler {
         return new byte[0];
     }
 
-    public byte[] getResponseBody() {
+    public HttpResponseBody getResponseBody() {
         return responseBody;
     }
 

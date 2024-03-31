@@ -1,25 +1,27 @@
 package webserver.handler;
 
+import httpMethods.MethodsHandler;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
-public class ErrorHandler {
-    private byte[] errorBody;
+public class ErrorHandler implements MethodsHandler {
+    private HttpResponseBody errorBody;
     private HttpResponseHeader errorHeader;
 
-    public ErrorHandler() {
-        set404Error();
+    public ErrorHandler() throws Exception {
+        run();
     }
 
-    private void set404Error(){
-        errorBody = "<h1>404 NOT FOUND!</h1>".getBytes();
-        errorHeader = HttpResponseHeader.make404Header(errorBody.length);
+    public void run() throws Exception {
+        errorBody = new HttpResponseBody("<h1>404 NOT FOUND!</h1>".getBytes());
+        errorHeader = HttpResponseHeader.make404Header(errorBody.length());
     }
 
-    public byte[] getErrorBody() {
+    public HttpResponseBody getResponseBody(){
         return errorBody;
     }
 
-    public HttpResponseHeader getErrorHeader() {
+    public HttpResponseHeader getResponseHeader(){
         return errorHeader;
     }
 }

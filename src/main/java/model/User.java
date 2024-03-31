@@ -2,10 +2,10 @@ package model;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import webserver.handler.RequestHandler;
+import webserver.httpElement.HttpRequestBody;
 
 public class User {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -22,11 +22,11 @@ public class User {
         logger.debug(this.toString());
     }
 
-    public User(Map<String, String> info) {
-        this.userId = info.get("userId");
-        this.password = info.get("password");
-        this.name = nameDecoder(info.get("name"));
-        this.email = info.get("email");
+    public User(HttpRequestBody httpRequestBody) {
+        this.userId = httpRequestBody.getUserId();
+        this.password = httpRequestBody.getPassword();
+        this.name = nameDecoder(httpRequestBody.getName());
+        this.email = httpRequestBody.getEmail();
         logger.debug(this.toString());
     }
 

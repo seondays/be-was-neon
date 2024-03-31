@@ -6,14 +6,14 @@ import java.io.FileNotFoundException;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.ExtensionType;
 import webserver.Request;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class CreateHandler implements PostHandler {
     private static final Logger logger = LoggerFactory.getLogger(CreateHandler.class);
     private final Request request;
-    private byte[] responseBody;
+    private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
 
     public CreateHandler(Request request) {
@@ -26,8 +26,8 @@ public class CreateHandler implements PostHandler {
     @Override
     public void run() throws FileNotFoundException {
         create();
-        responseBody = new byte[0];
-        responseHeader = HttpResponseHeader.make302Header(responseBody.length, "/");
+        responseBody = new HttpResponseBody();
+        responseHeader = HttpResponseHeader.make302Header(responseBody.length(), "/");
     }
 
     public void create() {
@@ -36,7 +36,7 @@ public class CreateHandler implements PostHandler {
         logger.info(Database.findUserById(requestUser.getUserId()).toString());
     }
 
-    public byte[] getResponseBody() {
+    public HttpResponseBody getResponseBody() {
         return responseBody;
     }
 

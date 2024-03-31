@@ -1,11 +1,12 @@
 package webserver;
 
 import httpMethods.MethodsHandler;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class Response {
     private HttpResponseHeader header;
-    private byte[] body;
+    private HttpResponseBody body;
     private final MethodsHandler methodsHandler;
 
     public Response(MethodsHandler methodsHandler) {
@@ -18,7 +19,7 @@ public class Response {
         header = methodsHandler.getResponseHeader();
     }
 
-    public byte[] getBody() {
+    public HttpResponseBody getBody() {
         return body;
     }
 

@@ -5,12 +5,13 @@ import webserver.Request;
 import webserver.handler.AuthenticationHandler;
 import webserver.handler.DynamicHttpBodyHandler;
 import webserver.handler.StaticHttpHandler;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class GetRouter implements MethodsHandler {
     private final AuthenticationHandler authenticationHandler;
     private final Request request;
-    private byte[] responseBody;
+    private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
     Path path;
 
@@ -37,7 +38,7 @@ public class GetRouter implements MethodsHandler {
         responseBody = getHandler.getResponseBody();
     }
 
-    public byte[] getResponseBody() {
+    public HttpResponseBody getResponseBody() {
         return responseBody;
     }
 

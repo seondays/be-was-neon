@@ -8,10 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import utils.Path;
 import webserver.Request;
+import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
 
 public class StaticHttpHandler implements GetHandler {
-    private byte[] responseBody;
+    private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
     private final Request request;
     private final Path path;
@@ -41,13 +42,13 @@ public class StaticHttpHandler implements GetHandler {
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
         if (needRedirectionPage.get(USER_RESOURCE) != null) {
-            responseBody = makeEmptyBody();
-            responseHeader = HttpResponseHeader.make302Header(responseBody.length, needRedirectionPage.get(USER_RESOURCE));
+            responseBody = new HttpResponseBody();
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length(), needRedirectionPage.get(USER_RESOURCE));
             return;
         }
         String fileUrl = path.buildURL(USER_RESOURCE);
-        responseBody = readFileToByte(fileUrl);
-        responseHeader = HttpResponseHeader.make200Header(responseBody.length, fileUrl);
+        responseBody = new HttpResponseBody(readFileToByte(fileUrl));
+        responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
     }
 
     /**
@@ -65,16 +66,7 @@ public class StaticHttpHandler implements GetHandler {
         return result;
     }
 
-    /**
-     * 빈 배열로 응답할 경우, 바로 new로 생성하는 것보다
-     * 메서드를 이용해 명시적으로 의미를 전달하고자 함
-     * @return 빈 바이트 배열
-     */
-    private byte[] makeEmptyBody() {
-        return new byte[0];
-    }
-
-    public byte[] getResponseBody() {
+    public HttpResponseBody getResponseBody() {
         return responseBody;
     }
 

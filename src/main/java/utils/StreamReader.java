@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class StreamReader {
     private Logger logger = LoggerFactory.getLogger(StreamReader.class);
-    private BufferedInputStream targetStream;
+    private final BufferedInputStream targetStream;
 
     public StreamReader(BufferedInputStream targetStream) {
         this.targetStream = targetStream;
@@ -63,7 +63,7 @@ public class StreamReader {
      * @throws IOException
      */
     public String readBody(int contentLength) throws IOException {
-        int bufferSize = 1024;
+        final int bufferSize = 1024;
         byte[] tmp;
         tmp = new byte[contentLength];
         while (contentLength > 0) {

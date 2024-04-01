@@ -28,9 +28,8 @@ public class SubmitArticleHandler implements PostHandler {
     @Override
     public void run() throws Exception {
         Article article = createArticle();
-        String userId = SessionHandler.getUserSession(sid).getUserId();
-        Database.addArticle(userId, article);
-        logger.info(Database.findArticle(userId).toString());
+        Database.addArticle(article);
+        logger.info(Database.findArticle().toString());
 
         responseBody = new HttpResponseBody();
         responseHeader = HttpResponseHeader.make302Header(responseBody.length(),"/main/index.html");

@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class Database {
     private static Map<String, User> users = new HashMap<>();
-    private static Map<String, List<Article>> articles = new HashMap<>();
+    private static Map<Integer, Article> articles = new HashMap<>();
 
     public static void addUser(User user) {
         users.put(user.getUserId(), user);
@@ -25,16 +25,12 @@ public class Database {
         return users.values();
     }
 
-    public static void addArticle(String userId, Article article) {
-        articles.computeIfAbsent(userId, k -> new ArrayList<>());
-        articles.get(userId).add(article);
+    public static void addArticle(Article article) {
+        articles.put(article.getArticleID(), article);
     }
 
     // todo : 최신 글이 아래로 나오는 문제 해결
-    public static List<Article> findArticle(String userId) {
-        if (articles.get(userId) != null) {
-            return articles.get(userId);
-        }
-        return new ArrayList<>();
+    public static Collection<Article> findArticle() {
+        return articles.values();
     }
 }

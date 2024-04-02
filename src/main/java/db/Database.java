@@ -1,7 +1,5 @@
 package db;
 
-import java.util.ArrayList;
-import java.util.List;
 import model.Article;
 import model.User;
 
@@ -30,7 +28,11 @@ public class Database {
     }
 
     // todo : 최신 글이 아래로 나오는 문제 해결
-    public static Collection<Article> findArticle() {
+    public static Collection<Article> findAllArticle() {
         return articles.values();
+    }
+
+    public static Article findArticle(int articleId){
+        return articles.get(articleId);
     }
 }

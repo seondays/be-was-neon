@@ -7,6 +7,7 @@ import httpResource.CreateHandler;
 import httpResource.LoginHandler;
 import httpResource.LogoutHandler;
 import httpResource.SubmitArticleHandler;
+import httpResource.SubmitCommentHandler;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class ResponseHandler {
         functionMap.put("/login", new LoginHandler(request));
         functionMap.put("/logout", new LogoutHandler(request));
         functionMap.put("/submit-article", new SubmitArticleHandler(request));
+        functionMap.put("/submit-comment", new SubmitCommentHandler(request));
     }
 
     /**

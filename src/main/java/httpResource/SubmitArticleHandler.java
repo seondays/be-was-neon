@@ -2,13 +2,10 @@ package httpResource;
 
 import db.Database;
 import httpMethods.PostHandler;
-import javax.xml.crypto.Data;
 import model.Article;
-import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import webserver.Request;
-import webserver.RequestParser;
 import webserver.handler.SessionHandler;
 import webserver.httpElement.HttpResponseBody;
 import webserver.httpElement.HttpResponseHeader;
@@ -29,7 +26,7 @@ public class SubmitArticleHandler implements PostHandler {
     public void run() throws Exception {
         Article article = createArticle();
         Database.addArticle(article);
-        logger.info(Database.findArticle().toString());
+        logger.info(Database.findAllArticle().toString());
 
         responseBody = new HttpResponseBody();
         responseHeader = HttpResponseHeader.make302Header(responseBody.length(),"/main/index.html");

@@ -31,4 +31,16 @@ public class HttpRequestBody {
     public String getEmail() {
         return body.get("email");
     }
+
+    public String getArticleBody() {
+        return body.get("articleBody");
+    }
+
+    public String getCommentBody() {
+        return body.get("commentBody");
+    }
+
+    public String getArticleId() {
+        return body.get("articleId");
+    }
 }

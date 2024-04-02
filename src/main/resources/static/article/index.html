@@ -27,6 +27,7 @@
             <div class="textfield textfield_size_m">
                 <p class="title_textfield">내용</p>
                 <textarea
+                        id="article-content"
                         class="input_textfield"
                         placeholder="글의 내용을 입력하세요"
                         autocomplete="username"
@@ -63,6 +64,30 @@
             alert('서버와의 통신 중 오류가 발생했습니다.');
         });
     })
+
+    document.getElementById('registration-btn').addEventListener('click', function (event) {
+        var articleBody = document.getElementById('article-content').value; // 글 내용을 가져옴
+
+        var data = {
+            articleBody: articleBody
+        };
+
+        fetch('/submit-article', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => {
+            if (response.redirected) {
+                alert('글이 성공적으로 등록되었습니다.');
+                window.location.href = response.url;
+            }
+        }).catch(error => {
+            console.error('fetch 에러:', error);
+            alert('서버와의 통신 중 오류가 발생했습니다.');
+        });
+    });
 </script>
 </body>
 </html>

@@ -45,7 +45,6 @@ public class DynamicHttpBodyHandler implements GetHandler {
 
     private void initMappingBodyHandler() {
         bodyModifier = new HashMap<>();
-        bodyModifier.put("/main/index.html", new ArticleBodyModifier());
         bodyModifier.put("/main", new ArticleBodyModifier());
         bodyModifier.put("/user/list", new UserListBodyModifier());
     }

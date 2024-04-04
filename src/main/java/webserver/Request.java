@@ -4,6 +4,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.HttpMethods;
+import utils.Path;
 import webserver.httpElement.HttpRequestBody;
 import webserver.httpElement.HttpRequestHeader;
 import webserver.httpElement.HttpRequestStartLine;
@@ -35,7 +36,8 @@ public class Request {
     }
 
     public String getResource() {
-        return startLine.getResource();
+        Path path = new Path();
+        return path.deleteDefault(startLine.getResource());
     }
 }
 

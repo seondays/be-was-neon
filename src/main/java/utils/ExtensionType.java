@@ -10,7 +10,8 @@ public enum ExtensionType {
     ICO("image/x-icon"),
     PNG("image/png"),
     JPG("image/jpg"),
-    SVG("image/svg+xml");
+    SVG("image/svg+xml"),
+    GIF("image/gif");
 
 
     private final String contentType;

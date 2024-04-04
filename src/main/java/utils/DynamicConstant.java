@@ -13,13 +13,13 @@ public class DynamicConstant {
         return comment;
     }
 
-    public static String articleHttpFormat(String articleBody, int articleId) {
+    public static String articleHttpFormat(String articleBody, int articleId, String image) {
         String article = "        <div class=\"post\">\n"
                 + "<div class=\"post__account\">\n"
                 + "                <img class=\"post__account__img\"/>\n"
                 + "                <p class=\"post__account__nickname\">account</p>\n"
                 + "            </div>\n"
-                + "            <img class=\"post__img\"/>\n"
+                + String.format("            <img class=\"post__img\" src=\"%s\"/>\n", image)
                 + "            <div class=\"post__menu\">\n"
                 + "                <ul class=\"post__menu__personal\">\n"
                 + "                    <li>\n"

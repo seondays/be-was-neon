@@ -32,7 +32,7 @@ public class ArticleBodyModifier implements DynamicBodyModifier {
             sb.append(line).append(NEW_LINE);
             if (line.contains("<!--            Article-->")) {
                 for (Article article : Database.findAllArticle()) {
-                    sb.append(DynamicConstant.articleHttpFormat(article.getTextBody(), article.getArticleID()));
+                    sb.append(DynamicConstant.articleHttpFormat(article.getTextBody(), article.getArticleID(), "../img/Ham.gif"));
                     readComments(article.getComments(), article.commentSize(), sb, article.getArticleID());
                     sb.append(DynamicConstant.navigatorHttpFormat(article.getArticleID()));
                 }

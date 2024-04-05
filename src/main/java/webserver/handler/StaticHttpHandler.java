@@ -14,13 +14,15 @@ import webserver.httpElement.HttpResponseHeader;
 public class StaticHttpHandler implements GetHandler {
     private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
+    private final AuthenticationHandler authenticationHandler;
     private final Request request;
     private final Path path;
     private Map<String, String> needRedirectionPage;
 
-    public StaticHttpHandler(Request request, Path path) {
+    public StaticHttpHandler(Request request, Path path, AuthenticationHandler authenticationHandler) {
         this.path = path;
         this.request = request;
+        this.authenticationHandler = authenticationHandler;
         initRedirectionPage();
     }
 
@@ -29,21 +31,23 @@ public class StaticHttpHandler implements GetHandler {
      */
     private void initRedirectionPage() {
         needRedirectionPage = new HashMap<>();
-        needRedirectionPage.put("/user/list", "/login");
-        needRedirectionPage.put("/main", "/");
-        needRedirectionPage.put("/article","/login");
+        needRedirectionPage.put("/", "/main");
+        needRedirectionPage.put("/registration", "/main");
+        needRedirectionPage.put("/login", "/main");
     }
 
+
     /**
-     * resource를 가져와 응답할 내용을 만든다.
-     *
+     * 정적 페이지를 찾아 응답한다.
+     * 접근이 불가능한 페이지에 대한 요청인 경우 리다이렉션 한다.
      * @throws Exception
      */
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
-        if (needRedirectionPage.get(USER_RESOURCE) != null) {
+        if (authenticationHandler.isAuthenticationUser() && needRedirectionPage.get(USER_RESOURCE) != null) {
             responseBody = new HttpResponseBody();
-            responseHeader = HttpResponseHeader.make302Header(responseBody.length(), needRedirectionPage.get(USER_RESOURCE));
+            responseHeader = HttpResponseHeader.make302Header(responseBody.length(),
+                    needRedirectionPage.get(USER_RESOURCE));
             return;
         }
         String fileUrl = path.buildURL(USER_RESOURCE);

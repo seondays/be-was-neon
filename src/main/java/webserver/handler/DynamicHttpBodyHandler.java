@@ -21,14 +21,16 @@ public class DynamicHttpBodyHandler implements GetHandler {
     public static final String NEW_LINE = "\n";
     private final Request request;
     private final Path path;
+    private final AuthenticationHandler authenticationHandler;
     private HttpResponseBody responseBody;
     private HttpResponseHeader responseHeader;
     private Map<String, String> needRedirectionPage;
     private Map<String, DynamicBodyModifier> bodyModifier;
 
-    public DynamicHttpBodyHandler(Request request, Path path) {
+    public DynamicHttpBodyHandler(Request request, Path path, AuthenticationHandler authenticationHandler) {
         this.request = request;
         this.path = path;
+        this.authenticationHandler = authenticationHandler;
         initRedirectionPage();
         initMappingBodyHandler();
     }
@@ -38,43 +40,40 @@ public class DynamicHttpBodyHandler implements GetHandler {
      */
     private void initRedirectionPage() {
         needRedirectionPage = new HashMap<>();
-        needRedirectionPage.put("/", "/main");
-        needRedirectionPage.put("/login", "/main");
-        needRedirectionPage.put("/registration", "/main");
+        needRedirectionPage.put("/user/list", "/");
+        needRedirectionPage.put("/main", "/");
+        needRedirectionPage.put("/article", "/");
     }
 
+    /**
+     * 요청 리소스 URL에 따라 적절한 modifier를 매핑해준다.
+     */
     private void initMappingBodyHandler() {
         bodyModifier = new HashMap<>();
         bodyModifier.put("/main", new ArticleBodyModifier());
         bodyModifier.put("/user/list", new UserListBodyModifier());
     }
 
-    /**
-     * 리소스에 따라 body를 만들어야 하는 부분이 달라지기 때문에 이를 분기하고
-     * 로그인 인증 여부에 따라서 리다이렉션이 필요한 리소스들을 관리하여 그곳으로의 접근을 막는다.
-     * 따로 modifier가 필요한 요청들은 해당 modifier로 보낸 후 값을 가져오게 하고
-     * 사용자 이름 추가하는 로직은 디폴트이기 때문에 bodyModifier에 없는 경우에는 이름만 추가해서 반환
-     * @throws Exception
-     */
+
     public void run() throws Exception {
         final String USER_RESOURCE = request.getResource();
         final String fileUrl = path.buildURL(USER_RESOURCE);
         String allFile = readFileAll(fileUrl);
-        String addNameBody = readAddNameBody(allFile, getUserName());
 
-        if (needRedirectionPage.get(USER_RESOURCE) != null) {
+        if (authenticationHandler.isAuthenticationUser()) {
+            String addNameBody = readAddNameBody(allFile, getUserName());
+            try {
+                DynamicBodyModifier modifier = bodyModifier.get(USER_RESOURCE);
+                responseBody = new HttpResponseBody(modifier.make(addNameBody));
+                responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
+            } catch (NullPointerException e) {
+                responseBody = new HttpResponseBody(addNameBody.getBytes());
+                responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
+            }
+        } else {
             responseBody = new HttpResponseBody();
             responseHeader = HttpResponseHeader.make302Header(responseBody.length(),
                     needRedirectionPage.get(USER_RESOURCE));
-            return;
-        }
-        try {
-            DynamicBodyModifier modifier = bodyModifier.get(USER_RESOURCE);
-            responseBody = new HttpResponseBody(modifier.make(addNameBody));
-            responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
-        } catch (NullPointerException e) {
-            responseBody = new HttpResponseBody(addNameBody.getBytes());
-            responseHeader = HttpResponseHeader.make200Header(responseBody.length(), fileUrl);
         }
     }
 

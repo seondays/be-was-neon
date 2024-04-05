@@ -31,6 +31,9 @@ public class ArticleBodyModifier implements DynamicBodyModifier {
         while ((line = reader.readLine()) != null) {
             sb.append(line).append(NEW_LINE);
             if (line.contains("<!--            Article-->")) {
+                if (Database.articleSize() < 1) {
+                    sb.append("<p class=\"no-content-message\">첫번째 글을 작성해 보세요!</p>").append(NEW_LINE);
+                }
                 for (Article article : Database.findAllArticle()) {
                     sb.append(DynamicConstant.articleHttpFormat(article.getTextBody(), article.getArticleID(), "../img/Ham.gif"));
                     readComments(article.getComments(), article.commentSize(), sb, article.getArticleID());

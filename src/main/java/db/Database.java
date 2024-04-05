@@ -32,6 +32,10 @@ public class Database {
         return articles.values();
     }
 
+    public static int articleSize() {
+        return articles.size();
+    }
+
     public static Article findArticle(int articleId){
         return articles.get(articleId);
     }
